@@ -1,0 +1,27 @@
+.reports-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 30px;
+  background: #e8f5e9;
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #2e7d32;
+  text-align: center;
+}
+
+.reports-container h2 {
+  margin-bottom: 20px;
+  font-weight: 700;
+}
+
+.summary p {
+  font-size: 1.1rem;
+  margin: 8px 0;
+}
+
+.notes {
+  margin-top: 20px;
+  font-style: italic;
+  color: #558b2f;
+}
