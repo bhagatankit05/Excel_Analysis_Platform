@@ -1,0 +1,83 @@
+/* Login.css */
+
+body {
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* background:linear-gradient(to right, #8aefc3ab, #cc17ebad); */
+  background:url("public/WhatsApp Image 2025-06-03 at 10.02.53_5e65ba29.jpg"); 
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity:75%;
+}
+.login-container {
+  max-width: 400px;
+  margin: 150px auto;
+  padding: 30px 30px;
+  border-radius: 12px;
+  background:linear-gradient(to right, #8aefc3ab, #cc17ebad);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  color: white;
+}
+.login-container h2 {
+  margin-bottom: 24px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.login-form input {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  outline: none;
+  font-size: 14px;
+}
+
+.login-form button {
+  padding: 12px;
+  border: none;
+  background-color:#4caf50;
+  color: white;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.login-form button:hover {
+  background-color: #333;
+}
+
+.error {
+  background-color: rgba(255, 0, 0, 0.1);
+  color: #ffcccc;
+  padding: 8px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.link {
+  color: #ffffff;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.link:hover {
+  color: #dcdcdc;
+}
+p{
+  color:black;
+}
