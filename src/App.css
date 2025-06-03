@@ -1,0 +1,29 @@
+body {
+  display:contents;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: rgb(9, 212, 219);
+
+}
+#root{
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-image:("public/WhatsApp Image 2025-06-03 at 10.02.53_5e65ba29.jpg"); /* Place your image in public/images/ */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button:focus,
+input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.3);
+}
