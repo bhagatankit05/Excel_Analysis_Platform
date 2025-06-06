@@ -1,26 +1,34 @@
 .navbar {
-  width: 100px;
-  height: 65px;
-  display:flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color :unset;
-  padding: 12px 24px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 220px;
+  height: 100vh;
+  background-color: #111;
   color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
 }
 
 .navbar-logo {
   font-weight: 700;
   font-size: 1.5rem;
+  margin-bottom: 40px;
+  text-align: center;
 }
 
 .navbar-links {
   list-style: none;
   display: flex;
+  flex-direction: column;
   gap: 20px;
-  margin: 0;
   padding: 0;
+  margin: 0;
+  flex-grow: 1;
 }
 
 .navbar-links li a {
@@ -39,24 +47,15 @@
   background-color: #e53935;
   border: none;
   color: white;
-  padding: 8px 16px;
+  padding: 10px;
   font-weight: 600;
   border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  margin-right: 60px;
+  width: 100%;
+  margin-top: auto;
 }
 
 .logout-btn:hover {
   background-color: #b71c1c;
-}
-.navbar {
-  width: 100%;
-  height: 60px;
-  display: flex;
-  background-color :unset;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 40px;
-  color: white;
 }

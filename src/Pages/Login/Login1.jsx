@@ -23,7 +23,6 @@ const Login1 = () => {
       return;
     }
 
-    // Check users from localStorage
     const users = JSON.parse(localStorage.getItem('users')) || [];
     const user = users.find(u => u.username === username && u.password === password);
 
@@ -32,7 +31,6 @@ const Login1 = () => {
       return;
     }
 
-    // Save JWT-like token in localStorage (simulate)
     localStorage.setItem('token', JSON.stringify({ username }));
     navigate('/dashboard');
   };
@@ -60,6 +58,14 @@ const Login1 = () => {
         />
         <button type="submit">Login</button>
       </form>
+
+      {/* Forgot Password Link */}
+      <p className="forgot-password">
+        <span onClick={() => navigate('/forgot-password')} className="link">
+          Forgot Password?
+        </span>
+      </p>
+
       <p>
         Don't have an account?{' '}
         <span className="link" onClick={() => navigate('/register')}>
