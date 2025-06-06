@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import ForgotPassword from './Pages/ForgotPassword/ForgotPassword';
 
 import Welcome from './Pages/Welcome/Welcome';
 import Register from './Pages/Register/Register';
@@ -13,7 +14,6 @@ import Navbar from './Components/Navbar/Navbar';
 import Footer from './Components/Footer/Footer';
 import ProtectedRoute from './Components/ProtectedRoute/ProtectedRoute';
 
-
 function App() {
   return (
     <Router>
@@ -22,8 +22,10 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Welcome />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login1 />} />
+
+        {/* Role-based Login & Register Routes */}
+        <Route path="/register/:role" element={<Register />} />
+        <Route path="/login/:role" element={<Login1 />} />
 
         {/* Protected Routes */}
         <Route 
@@ -38,7 +40,7 @@ function App() {
           path="/reports"
           element={
             <ProtectedRoute>
-              <Report/>
+              <Report />
             </ProtectedRoute>
           }
         />
@@ -59,8 +61,7 @@ function App() {
           }
         />
 
-        {/* Redirect any unknown route to Welcome */}
-        <Route path="*" element={<Navigate to="/" />} />
+       <Route path="/forgot-password" element={<ForgotPassword />} />
       </Routes>
 
       <Footer />

@@ -1,25 +1,46 @@
+/* Animated gradient background */
+@keyframes gradientBG {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 .welcome-container {
   text-align: center;
-  padding: 0 px;
+  padding: 0; /* fixed extra space */
   height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 100%;  
+  width: 100%;
+
+  /* Gradient background */
+  background: linear-gradient(270deg, #ff7e5f, #feb47b, #86a8e7, #91eae4);
+  background-size: 800% 800%;
+  animation: gradientBG 15s ease infinite;
+  color: white; /* default text color */
 }
 
 .welcome-container h1 {
   font-size: 3.5rem;
   margin-bottom: 10rem;
-  color: antiquewhite;
-  
+  /* Keep text white for contrast on gradient */
+  color: white;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.4);
 }
 
 .welcome-container p {
   font-size: 1.5rem;
   margin-bottom: 2rem;
-  color:lemonchiffon;
+  color: white;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 
 .welcome-buttons button {
@@ -29,19 +50,27 @@
   cursor: pointer;
   border: none;
   border-radius: 8px;
-  background-color: #4caf50;
+
+  /* Button gradient */
+  background: linear-gradient(45deg, #36d1dc, #5b86e5);
   color: white;
-  transition: background 0.3s ease;
+
+  transition: background 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
 }
 
 .welcome-buttons button:hover {
-  background-color: #45a049;
+  background: linear-gradient(45deg, #5b86e5, #36d1dc);
+  transform: scale(1.05);
+  box-shadow: 0 6px 10px rgba(0,0,0,0.3);
 }
 
-.div h1{
+
+.div h1 {
+ 
   color: #1f2937;
-
 }
-.div p{
-  color:#6B7280;
+
+.div p {
+  color: #6B7280;
 }
