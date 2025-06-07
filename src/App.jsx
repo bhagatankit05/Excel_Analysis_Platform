@@ -72,8 +72,8 @@ function App() {
             />
 
             {/* Redirect old routes */}
-            <Route path="/login" element={<Navigate to="/\" replace />} />
-            <Route path="/register" element={<Navigate to="/\" replace />} />
+            <Route path="/login" element={<Navigate to="/" replace />} />
+            <Route path="/register" element={<Navigate to="/" replace />} />
           </Routes>
         </Layout>
       </Router>
