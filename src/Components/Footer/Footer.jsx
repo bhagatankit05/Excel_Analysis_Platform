@@ -1,12 +1,9 @@
+// This component is no longer used with the new layout
+// Keeping for backward compatibility
 import React from 'react';
-import './Footer.css';
 
 const Footer = () => {
-  return (
-    <footer className="footer">
-      <p>© {new Date().getFullYear()} Excel Analyzer. All rights reserved.</p>
-    </footer>
-  );
+  return null;
 };
 
 export default Footer;
