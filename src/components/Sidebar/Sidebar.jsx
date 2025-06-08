@@ -7,21 +7,22 @@ const Sidebar = () => {
   const { user, logout, isAdmin } = useAuth();
 
   const adminMenuItems = [
-    { path: '/dashboard', icon: '📊', label: 'Dashboard' },
-    { path: '/upload', icon: '📤', label: 'Upload Excel' },
-    { path: '/analyze', icon: '🔍', label: 'Analyze Data' },
-    { path: '/reports', icon: '📈', label: 'Reports' },
+    { path: '/dashboard', icon: '📊', label: 'Analytics Hub' },
+    { path: '/upload', icon: '📤', label: 'Data Ingestion' },
+    { path: '/analyze', icon: '🔍', label: 'Deep Analysis' },
+    { path: '/reports', icon: '📈', label: 'Intelligence Reports' },
     { path: '/users', icon: '👥', label: 'User Management' },
-    { path: '/settings', icon: '⚙️', label: 'Settings' },
-    { path: '/insights', icon: '💡', label: 'AI Insights' }
+    { path: '/ai-insights', icon: '🧠', label: 'AI Insights' },
+    { path: '/settings', icon: '⚙️', label: 'System Config' }
   ];
 
   const userMenuItems = [
-    { path: '/dashboard', icon: '📊', label: 'Dashboard' },
-    { path: '/upload', icon: '📤', label: 'Upload Excel' },
-    { path: '/analyze', icon: '🔍', label: 'Analyze Data' },
+    { path: '/dashboard', icon: '📊', label: 'Analytics Hub' },
+    { path: '/upload', icon: '📤', label: 'Data Upload' },
+    { path: '/analyze', icon: '🔍', label: 'Data Analysis' },
     { path: '/reports', icon: '📈', label: 'My Reports' },
-    { path: '/history', icon: '📋', label: 'History' }
+    { path: '/ai-insights', icon: '🧠', label: 'AI Insights' },
+    { path: '/history', icon: '📋', label: 'Activity Log' }
   ];
 
   const menuItems = isAdmin ? adminMenuItems : userMenuItems;
@@ -30,8 +31,8 @@ const Sidebar = () => {
     <div className="sidebar">
       <div className="sidebar-header">
         <div className="logo">
-          <span className="logo-icon">📊</span>
-          <span className="logo-text">Excel Analyzer</span>
+          <span className="logo-icon">⚡</span>
+          <span className="logo-text">DataFlow Analytics</span>
         </div>
         <div className="user-info">
           <div className="user-avatar">
@@ -39,7 +40,7 @@ const Sidebar = () => {
           </div>
           <div className="user-details">
             <span className="username">{user?.username}</span>
-            <span className="user-role">{user?.role}</span>
+            <span className="user-role">{user?.role === 'admin' ? 'System Admin' : 'Data Analyst'}</span>
           </div>
         </div>
       </div>

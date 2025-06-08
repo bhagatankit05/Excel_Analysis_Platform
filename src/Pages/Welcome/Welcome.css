@@ -1,130 +1,395 @@
-/* Animated gradient background */
+/* Enhanced techie welcome page styles */
 @keyframes gradientBG {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(102, 126, 234, 0.6); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .welcome-container {
-  text-align: center;
-  padding: 0; /* fixed extra space */
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 100%;
-
-  /* Gradient background */
-  background: linear-gradient(270deg, #ff7e5f, #feb47b, #86a8e7, #91eae4);
-  background-size: 800% 800%;
-  animation: gradientBG 15s ease infinite;
-  color: white; /* default text color */
-}
-
-.welcome-container h1 {
-  font-size: 3.5rem;
-  margin-bottom: 10rem;
-  /* Keep text white for contrast on gradient */
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
+  background-size: 400% 400%;
+  animation: gradientBG 20s ease infinite;
   color: white;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  position: relative;
+  overflow: hidden;
 }
 
-.welcome-container p {
-  font-size: 1.5rem;
-  margin-bottom: 2rem;
-  color: white;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+.welcome-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+  pointer-events: none;
 }
 
-.role-selection {
+.hero-section {
+  text-align: center;
+  margin-bottom: 60px;
+  animation: slideIn 1s ease-out;
+  z-index: 1;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.logo-icon {
+  font-size: 48px;
+  animation: float 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.5));
+}
+
+.hero-section h1 {
+  font-size: 4rem;
+  font-weight: 800;
+  margin: 0;
+  background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientBG 8s ease infinite;
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+}
+
+.tagline {
+  margin-bottom: 40px;
+}
+
+.tagline p {
+  font-size: 1.4rem;
+  margin-bottom: 16px;
+  color: #e2e8f0;
+  font-weight: 300;
+}
+
+.feature-rotator {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.feature-text {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #feca57;
+  background: rgba(254, 202, 87, 0.1);
+  padding: 8px 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(254, 202, 87, 0.3);
+  animation: glow 2s ease-in-out infinite;
+}
+
+.tech-stats {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.stat-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
+  gap: 8px;
 }
 
-.role-selection h2 {
+.stat-number {
   font-size: 2rem;
-  margin-bottom: 1rem;
-  color: white;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  font-weight: 700;
+  color: #48bb78;
+  text-shadow: 0 0 10px rgba(72, 187, 120, 0.5);
 }
 
-.role-selection button {
-  margin: 0 20px;
-  padding: 15px 30px;
-  font-size: 1.2rem;
-  cursor: pointer;
-  border: none;
-  border-radius: 12px;
-  min-width: 150px;
-
-  /* Button gradient */
-  background: linear-gradient(45deg, #36d1dc, #5b86e5);
-  color: white;
-
-  transition: all 0.3s ease;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.2);
-  font-weight: 600;
+.stat-label {
+  font-size: 0.9rem;
+  color: #a0aec0;
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
-.role-selection button:hover {
-  background: linear-gradient(45deg, #5b86e5, #36d1dc);
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+.role-selection {
+  text-align: center;
+  margin-bottom: 60px;
+  animation: slideIn 1s ease-out 0.3s both;
+  z-index: 1;
 }
 
-.welcome-buttons {
+.role-selection h2 {
+  font-size: 2.5rem;
+  margin-bottom: 40px;
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.role-cards {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
+  gap: 32px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
-.welcome-buttons p {
-  font-size: 1.3rem;
-  margin-bottom: 1rem;
-  color: white;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.3);
-}
-
-.welcome-buttons button {
-  margin: 8px 15px;
-  padding: 12px 25px;
-  font-size: 1rem;
+.role-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 32px 24px;
+  width: 320px;
   cursor: pointer;
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.role-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.role-card:hover::before {
+  left: 100%;
+}
+
+.role-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+  border-color: rgba(102, 126, 234, 0.5);
+}
+
+.role-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.role-card h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #f7fafc;
+}
+
+.role-card p {
+  color: #cbd5e0;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.role-card ul {
+  list-style: none;
+  padding: 0;
+  text-align: left;
+}
+
+.role-card li {
+  color: #a0aec0;
+  margin-bottom: 8px;
+  position: relative;
+  padding-left: 20px;
+}
+
+.role-card li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #48bb78;
+  font-weight: bold;
+}
+
+.auth-section {
+  text-align: center;
+  animation: slideIn 1s ease-out 0.5s both;
+  z-index: 1;
+}
+
+.selected-role {
+  margin-bottom: 32px;
+}
+
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(102, 126, 234, 0.2);
+  border: 1px solid rgba(102, 126, 234, 0.4);
+  padding: 12px 24px;
+  border-radius: 50px;
+  backdrop-filter: blur(10px);
+}
+
+.role-badge .role-icon {
+  font-size: 1.5rem;
+}
+
+.role-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.auth-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 32px;
   border: none;
-  border-radius: 8px;
-  min-width: 140px;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 180px;
+  justify-content: center;
+}
 
-  /* Button gradient */
-  background: linear-gradient(45deg, #36d1dc, #5b86e5);
+.auth-btn.primary {
+  background: linear-gradient(45deg, #667eea, #764ba2);
   color: white;
-
-  transition: background 0.3s ease, transform 0.2s ease;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-  font-weight: 500;
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
 }
 
-.welcome-buttons button:hover {
-  background: linear-gradient(45deg, #5b86e5, #36d1dc);
-  transform: scale(1.05);
-  box-shadow: 0 6px 10px rgba(0,0,0,0.3);
+.auth-btn.primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
 }
 
-.div h1 {
-  color: #1f2937;
+.auth-btn.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
 }
 
-.div p {
-  color: #6B7280;
+.auth-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-3px);
+}
+
+.change-role-btn {
+  background: none;
+  border: none;
+  color: #a0aec0;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: color 0.3s ease;
+}
+
+.change-role-btn:hover {
+  color: #e2e8f0;
+}
+
+.tech-features {
+  margin-top: 80px;
+  animation: slideIn 1s ease-out 0.7s both;
+  z-index: 1;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 32px;
+  max-width: 800px;
+}
+
+.feature-item {
+  text-align: center;
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.feature-item:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.feature-icon {
+  font-size: 2.5rem;
+  margin-bottom: 16px;
+}
+
+.feature-item h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #f7fafc;
+}
+
+.feature-item p {
+  color: #a0aec0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .hero-section h1 {
+    font-size: 2.5rem;
+  }
+  
+  .tech-stats {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .role-cards {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .auth-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
 }
