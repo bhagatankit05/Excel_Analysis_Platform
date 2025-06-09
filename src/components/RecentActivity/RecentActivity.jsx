@@ -33,7 +33,7 @@ const RecentActivity = () => {
     // Sort by timestamp (newest first)
     const sortedActivities = filteredActivities
       .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-      .slice(0, 10); // Show only last 10 activities
+      .slice(0, 15); // Show only last 15 activities
     
     setActivities(sortedActivities);
     setLoading(false);
@@ -51,7 +51,10 @@ const RecentActivity = () => {
       export: '📄',
       delete: '🗑️',
       user_created: '👤',
-      system: '🖥️'
+      system: '🖥️',
+      download: '📥',
+      chart_view: '📈',
+      data_process: '⚡'
     };
     return icons[type] || '📋';
   };
@@ -68,7 +71,10 @@ const RecentActivity = () => {
       export: '#4ecdc4',
       delete: '#ff7675',
       user_created: '#74b9ff',
-      system: '#a29bfe'
+      system: '#a29bfe',
+      download: '#00b894',
+      chart_view: '#e17055',
+      data_process: '#6c5ce7'
     };
     return colors[type] || '#718096';
   };
@@ -81,7 +87,8 @@ const RecentActivity = () => {
     if (diffInSeconds < 60) return 'Just now';
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
-    return `${Math.floor(diffInSeconds / 86400)}d ago`;
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+    return time.toLocaleDateString();
   };
 
   const refreshActivities = () => {
@@ -101,6 +108,19 @@ const RecentActivity = () => {
     }
   };
 
+  const exportActivities = () => {
+    const dataStr = JSON.stringify(activities, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `activity-log-${user?.username}-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    
+    addActivity('export', 'Exported activity log', 'Downloaded as JSON file');
+  };
+
   if (loading) {
     return (
       <div className="recent-activity">
@@ -118,10 +138,13 @@ const RecentActivity = () => {
   return (
     <div className="recent-activity">
       <div className="activity-header">
-        <h3>🕒 Real-time Activity</h3>
+        <h3>🕒 Activity Log</h3>
         <div className="activity-controls">
           <button className="control-btn" onClick={refreshActivities} title="Refresh">
             🔄
+          </button>
+          <button className="control-btn" onClick={exportActivities} title="Export">
+            📤
           </button>
           {isAdmin && (
             <button className="control-btn danger" onClick={clearActivities} title="Clear All">
@@ -180,7 +203,7 @@ const RecentActivity = () => {
   );
 };
 
-// Helper function to add activity (can be called from other components)
+// Enhanced helper function to add activity
 export const addActivity = (type, description, details = null) => {
   const user = JSON.parse(localStorage.getItem('token'));
   if (!user) return;

@@ -13,9 +13,88 @@ const Register = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(0);
+
+  const validatePassword = (password) => {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    let strength = 0;
+    let errors = [];
+
+    if (password.length >= minLength) strength++;
+    else errors.push('At least 8 characters');
+
+    if (hasUpperCase) strength++;
+    else errors.push('One uppercase letter');
+
+    if (hasLowerCase) strength++;
+    else errors.push('One lowercase letter');
+
+    if (hasNumbers) strength++;
+    else errors.push('One number');
+
+    if (hasSpecialChar) strength++;
+    else errors.push('One special character (!@#$%^&*(),.?":{}|<>)');
+
+    return { strength, errors, isValid: strength === 5 };
+  };
+
+  const validateUsername = (username) => {
+    const minLength = 3;
+    const maxLength = 20;
+    const validPattern = /^[a-zA-Z0-9_]+$/;
+
+    if (username.length < minLength) {
+      return 'Username must be at least 3 characters long';
+    }
+    if (username.length > maxLength) {
+      return 'Username cannot exceed 20 characters';
+    }
+    if (!validPattern.test(username)) {
+      return 'Username can only contain letters, numbers, and underscores';
+    }
+    return null;
+  };
+
+  const validateEmail = (email) => {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+      return 'Please enter a valid email address';
+    }
+    return null;
+  };
 
   const handleChange = e => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    
+    // Clear error when user starts typing
+    if (error) setError('');
+
+    // Update password strength
+    if (name === 'password') {
+      const { strength } = validatePassword(value);
+      setPasswordStrength(strength);
+    }
+  };
+
+  const getPasswordStrengthColor = () => {
+    if (passwordStrength <= 2) return '#f5576c';
+    if (passwordStrength <= 3) return '#feca57';
+    if (passwordStrength <= 4) return '#48bb78';
+    return '#667eea';
+  };
+
+  const getPasswordStrengthText = () => {
+    if (passwordStrength <= 1) return 'Very Weak';
+    if (passwordStrength <= 2) return 'Weak';
+    if (passwordStrength <= 3) return 'Fair';
+    if (passwordStrength <= 4) return 'Good';
+    return 'Strong';
   };
 
   const handleSubmit = async e => {
@@ -26,14 +105,30 @@ const Register = () => {
       setError('All fields are required.');
       return;
     }
-    
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+
+    // Validate username
+    const usernameError = validateUsername(username);
+    if (usernameError) {
+      setError(usernameError);
       return;
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long.');
+    // Validate email
+    const emailError = validateEmail(email);
+    if (emailError) {
+      setError(emailError);
+      return;
+    }
+
+    // Validate password
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      setError(`Password requirements: ${passwordValidation.errors.join(', ')}`);
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
       return;
     }
 
@@ -95,6 +190,7 @@ const Register = () => {
               autoComplete="off"
               disabled={loading}
             />
+            <small className="input-hint">3-20 characters, letters, numbers, and underscores only</small>
           </div>
           
           <div className="form-group">
@@ -108,6 +204,7 @@ const Register = () => {
               autoComplete="email"
               disabled={loading}
             />
+            <small className="input-hint">We'll use this for account recovery</small>
           </div>
           
           <div className="form-group">
@@ -115,12 +212,29 @@ const Register = () => {
             <input
               type="password"
               name="password"
-              placeholder="Create a password"
+              placeholder="Create a strong password"
               value={formData.password}
               onChange={handleChange}
               autoComplete="new-password"
               disabled={loading}
             />
+            {formData.password && (
+              <div className="password-strength">
+                <div className="strength-bar">
+                  <div 
+                    className="strength-fill" 
+                    style={{ 
+                      width: `${(passwordStrength / 5) * 100}%`,
+                      backgroundColor: getPasswordStrengthColor()
+                    }}
+                  ></div>
+                </div>
+                <small className="strength-text" style={{ color: getPasswordStrengthColor() }}>
+                  {getPasswordStrengthText()}
+                </small>
+              </div>
+            )}
+            <small className="input-hint">8+ characters with uppercase, lowercase, number, and special character</small>
           </div>
           
           <div className="form-group">
@@ -134,6 +248,9 @@ const Register = () => {
               autoComplete="new-password"
               disabled={loading}
             />
+            {formData.confirmPassword && formData.password !== formData.confirmPassword && (
+              <small className="error-hint">Passwords do not match</small>
+            )}
           </div>
           
           <button type="submit" className="auth-btn" disabled={loading}>

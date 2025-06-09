@@ -14,8 +14,54 @@ const Login1 = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const validatePassword = (password) => {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    if (password.length < minLength) {
+      return 'Password must be at least 8 characters long';
+    }
+    if (!hasUpperCase) {
+      return 'Password must contain at least one uppercase letter';
+    }
+    if (!hasLowerCase) {
+      return 'Password must contain at least one lowercase letter';
+    }
+    if (!hasNumbers) {
+      return 'Password must contain at least one number';
+    }
+    if (!hasSpecialChar) {
+      return 'Password must contain at least one special character (!@#$%^&*(),.?":{}|<>)';
+    }
+    return null;
+  };
+
+  const validateUsername = (username) => {
+    const minLength = 3;
+    const maxLength = 20;
+    const validPattern = /^[a-zA-Z0-9_]+$/;
+
+    if (username.length < minLength) {
+      return 'Username must be at least 3 characters long';
+    }
+    if (username.length > maxLength) {
+      return 'Username cannot exceed 20 characters';
+    }
+    if (!validPattern.test(username)) {
+      return 'Username can only contain letters, numbers, and underscores';
+    }
+    return null;
+  };
+
   const handleChange = e => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    
+    // Clear error when user starts typing
+    if (error) setError('');
   };
 
   const handleSubmit = async e => {
@@ -24,6 +70,13 @@ const Login1 = () => {
 
     if (!username || !password) {
       setError('Please fill in all fields.');
+      return;
+    }
+
+    // Validate username
+    const usernameError = validateUsername(username);
+    if (usernameError) {
+      setError(usernameError);
       return;
     }
 
@@ -72,6 +125,7 @@ const Login1 = () => {
               autoComplete="username"
               disabled={loading}
             />
+            <small className="input-hint">3-20 characters, letters, numbers, and underscores only</small>
           </div>
           
           <div className="form-group">
@@ -85,6 +139,7 @@ const Login1 = () => {
               autoComplete="current-password"
               disabled={loading}
             />
+            <small className="input-hint">8+ characters with uppercase, lowercase, number, and special character</small>
           </div>
           
           <button type="submit" className="auth-btn" disabled={loading}>

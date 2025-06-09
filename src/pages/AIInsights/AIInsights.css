@@ -87,6 +87,103 @@
   transform: translateY(-2px);
 }
 
+/* Chart Section */
+.chart-section {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  margin-bottom: 32px;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.chart-header h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0;
+}
+
+.chart-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.chart-btn {
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  color: #718096;
+}
+
+.chart-btn:hover {
+  background: #f7fafc;
+  border-color: #cbd5e0;
+}
+
+.chart-btn.active {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+  border-color: transparent;
+}
+
+.chart-container {
+  height: 400px;
+  position: relative;
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.chart-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #718096;
+  font-style: italic;
+}
+
+.chart-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.download-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(102, 126, 234, 0.1);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  color: #667eea;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.download-btn:hover {
+  background: rgba(102, 126, 234, 0.15);
+  transform: translateY(-2px);
+}
+
 .model-info {
   margin-bottom: 32px;
 }
@@ -113,6 +210,7 @@
 .model-stats {
   display: flex;
   gap: 32px;
+  flex-wrap: wrap;
 }
 
 .stat {
@@ -305,7 +403,7 @@
   background: #f7fafc;
   padding: 16px;
   border-radius: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .recommendation h4 {
@@ -320,6 +418,18 @@
   color: #4a5568;
   margin: 0;
   line-height: 1.5;
+}
+
+.insight-details {
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  background: #f7fafc;
+  border-radius: 8px;
+}
+
+.insight-details small {
+  color: #718096;
+  font-size: 11px;
 }
 
 .insight-actions {
@@ -432,5 +542,14 @@
   .model-stats {
     flex-direction: column;
     gap: 16px;
+  }
+
+  .chart-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .chart-controls {
+    justify-content: center;
   }
 }

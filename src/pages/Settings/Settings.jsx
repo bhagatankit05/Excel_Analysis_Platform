@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import './Settings.css';
 
@@ -7,7 +7,7 @@ const Settings = () => {
   const [activeTab, setActiveTab] = useState('general');
   const [settings, setSettings] = useState({
     general: {
-      theme: 'dark',
+      theme: 'light',
       language: 'en',
       timezone: 'UTC',
       notifications: true,
@@ -37,21 +37,66 @@ const Settings = () => {
     }
   });
 
-  const tabs = [
+  const tabs = isAdmin ? [
     { id: 'general', label: 'General', icon: '⚙️' },
     { id: 'security', label: 'Security', icon: '🔒' },
     { id: 'performance', label: 'Performance', icon: '⚡' },
     { id: 'ai', label: 'AI Configuration', icon: '🧠' }
+  ] : [
+    { id: 'general', label: 'General', icon: '⚙️' },
+    { id: 'security', label: 'Security', icon: '🔒' },
+    { id: 'ai', label: 'AI Configuration', icon: '🧠' }
   ];
 
+  useEffect(() => {
+    // Load saved settings
+    const savedSettings = localStorage.getItem('systemSettings');
+    if (savedSettings) {
+      setSettings(JSON.parse(savedSettings));
+    }
+
+    // Apply theme
+    applyTheme(settings.general.theme);
+  }, []);
+
+  const applyTheme = (theme) => {
+    const root = document.documentElement;
+    
+    if (theme === 'dark') {
+      root.style.setProperty('--bg-primary', '#1a202c');
+      root.style.setProperty('--bg-secondary', '#2d3748');
+      root.style.setProperty('--text-primary', '#f7fafc');
+      root.style.setProperty('--text-secondary', '#e2e8f0');
+      root.style.setProperty('--border-color', '#4a5568');
+      document.body.classList.add('dark-theme');
+    } else if (theme === 'light') {
+      root.style.setProperty('--bg-primary', '#ffffff');
+      root.style.setProperty('--bg-secondary', '#f7fafc');
+      root.style.setProperty('--text-primary', '#1a202c');
+      root.style.setProperty('--text-secondary', '#718096');
+      root.style.setProperty('--border-color', '#e2e8f0');
+      document.body.classList.remove('dark-theme');
+    } else { // auto
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      applyTheme(prefersDark ? 'dark' : 'light');
+    }
+  };
+
   const handleSettingChange = (category, key, value) => {
-    setSettings(prev => ({
-      ...prev,
+    const newSettings = {
+      ...settings,
       [category]: {
-        ...prev[category],
+        ...settings[category],
         [key]: value
       }
-    }));
+    };
+    
+    setSettings(newSettings);
+
+    // Apply theme immediately if changed
+    if (category === 'general' && key === 'theme') {
+      applyTheme(value);
+    }
   };
 
   const saveSettings = () => {
@@ -61,10 +106,9 @@ const Settings = () => {
 
   const resetSettings = () => {
     if (confirm('Are you sure you want to reset all settings to default?')) {
-      // Reset to default values
-      setSettings({
+      const defaultSettings = {
         general: {
-          theme: 'dark',
+          theme: 'light',
           language: 'en',
           timezone: 'UTC',
           notifications: true,
@@ -92,7 +136,39 @@ const Settings = () => {
           enableAutoAnalysis: true,
           confidenceThreshold: '70'
         }
-      });
+      };
+      
+      setSettings(defaultSettings);
+      applyTheme('light');
+    }
+  };
+
+  const exportSettings = () => {
+    const dataStr = JSON.stringify(settings, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `settings-${user?.username}-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importSettings = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const importedSettings = JSON.parse(e.target.result);
+          setSettings(importedSettings);
+          applyTheme(importedSettings.general.theme);
+          alert('Settings imported successfully!');
+        } catch (error) {
+          alert('Error importing settings. Please check the file format.');
+        }
+      };
+      reader.readAsText(file);
     }
   };
 
@@ -108,8 +184,9 @@ const Settings = () => {
         >
           <option value="light">Light</option>
           <option value="dark">Dark</option>
-          <option value="auto">Auto</option>
+          <option value="auto">Auto (System)</option>
         </select>
+        <small className="setting-hint">Choose your preferred color scheme</small>
       </div>
 
       <div className="setting-group">
@@ -122,6 +199,8 @@ const Settings = () => {
           <option value="es">Spanish</option>
           <option value="fr">French</option>
           <option value="de">German</option>
+          <option value="zh">Chinese</option>
+          <option value="ja">Japanese</option>
         </select>
       </div>
 
@@ -135,6 +214,8 @@ const Settings = () => {
           <option value="EST">Eastern Time</option>
           <option value="PST">Pacific Time</option>
           <option value="GMT">Greenwich Mean Time</option>
+          <option value="CET">Central European Time</option>
+          <option value="JST">Japan Standard Time</option>
         </select>
       </div>
 
@@ -147,6 +228,7 @@ const Settings = () => {
           min="1"
           max="365"
         />
+        <small className="setting-hint">How long to keep your data before automatic cleanup</small>
       </div>
 
       <div className="setting-toggle">
@@ -186,6 +268,7 @@ const Settings = () => {
           min="5"
           max="480"
         />
+        <small className="setting-hint">Automatically log out after inactivity</small>
       </div>
 
       <div className="setting-group">
@@ -197,6 +280,7 @@ const Settings = () => {
           min="30"
           max="365"
         />
+        <small className="setting-hint">Force password change after this period</small>
       </div>
 
       <div className="setting-toggle">
@@ -244,9 +328,9 @@ const Settings = () => {
           value={settings.performance.compressionLevel}
           onChange={(e) => handleSettingChange('performance', 'compressionLevel', e.target.value)}
         >
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
+          <option value="low">Low (Faster)</option>
+          <option value="medium">Medium (Balanced)</option>
+          <option value="high">High (Smaller files)</option>
         </select>
       </div>
 
@@ -259,6 +343,7 @@ const Settings = () => {
           min="1"
           max="20"
         />
+        <small className="setting-hint">Maximum number of simultaneous data processing jobs</small>
       </div>
 
       <div className="setting-group">
@@ -322,6 +407,7 @@ const Settings = () => {
           min="1000"
           max="8000"
         />
+        <small className="setting-hint">Maximum tokens for AI responses</small>
       </div>
 
       <div className="setting-group">
@@ -335,6 +421,7 @@ const Settings = () => {
           onChange={(e) => handleSettingChange('ai', 'temperature', e.target.value)}
         />
         <span className="range-value">{settings.ai.temperature}</span>
+        <small className="setting-hint">Higher values make output more creative</small>
       </div>
 
       <div className="setting-group">
@@ -348,6 +435,7 @@ const Settings = () => {
           onChange={(e) => handleSettingChange('ai', 'confidenceThreshold', e.target.value)}
         />
         <span className="range-value">{settings.ai.confidenceThreshold}%</span>
+        <small className="setting-hint">Minimum confidence for AI recommendations</small>
       </div>
 
       <div className="setting-toggle">
@@ -387,7 +475,7 @@ const Settings = () => {
         <div className="settings-content">
           {activeTab === 'general' && renderGeneralSettings()}
           {activeTab === 'security' && renderSecuritySettings()}
-          {activeTab === 'performance' && renderPerformanceSettings()}
+          {activeTab === 'performance' && isAdmin && renderPerformanceSettings()}
           {activeTab === 'ai' && renderAISettings()}
 
           <div className="settings-actions">
@@ -399,6 +487,20 @@ const Settings = () => {
               <span>🔄</span>
               Reset to Default
             </button>
+            <button className="export-btn" onClick={exportSettings}>
+              <span>📤</span>
+              Export Settings
+            </button>
+            <label className="import-btn">
+              <span>📥</span>
+              Import Settings
+              <input 
+                type="file" 
+                accept=".json" 
+                onChange={importSettings}
+                style={{ display: 'none' }}
+              />
+            </label>
           </div>
         </div>
       </div>
