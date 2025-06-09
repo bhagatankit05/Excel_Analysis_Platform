@@ -64,43 +64,48 @@ const Login1 = () => {
     if (error) setError('');
   };
 
-  const handleSubmit = async e => {
-    e.preventDefault();
-    const { username, password } = formData;
+  //*** */
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  const { username, password } = formData;
 
-    if (!username || !password) {
-      setError('Please fill in all fields.');
-      return;
-    }
+  if (!username || !password) {
+    setError('Please fill in all fields.');
+    return;
+  }
 
-    // Validate username
-    const usernameError = validateUsername(username);
-    if (usernameError) {
-      setError(usernameError);
-      return;
-    }
+  const usernameError = validateUsername(username);
+  if (usernameError) {
+    setError(usernameError);
+    return;
+  }
 
-    setLoading(true);
-    setError('');
+  const passwordError = validatePassword(password);
+  if (passwordError) {
+    setError(passwordError);
+    return;
+  }
 
-    try {
-      const users = JSON.parse(localStorage.getItem('users')) || [];
-      const user = users.find(u => u.username === username && u.password === password && u.role === role);
+  setLoading(true);
+  setError('');
 
-      if (!user) {
-        setError('Invalid username, password, or role.');
-        return;
-      }
+  try {
+    const result = await login({ username, password, role });
 
-      // Login user with role
-      login({ username, role });
+    if (result.success) {
       navigate('/dashboard');
-    } catch (error) {
-      setError('Login failed. Please try again.');
-    } finally {
-      setLoading(false);
+    } else {
+      setError(result.message || 'Invalid username, password, or role.');
     }
-  };
+  } catch (err) {
+    setError('Login failed. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
 
   return (
     <div className="auth-page">
