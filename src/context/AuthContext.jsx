@@ -18,7 +18,44 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     initializeAuth();
+    createDemoUsers(); // Create demo users for testing
   }, []);
+
+  const createDemoUsers = () => {
+    const existingUsers = JSON.parse(localStorage.getItem('users')) || [];
+    
+    // Check if demo users already exist
+    const hasAdmin = existingUsers.find(u => u.username === 'admin');
+    const hasUser = existingUsers.find(u => u.username === 'user');
+    
+    if (!hasAdmin || !hasUser) {
+      const demoUsers = [
+        {
+          username: 'admin',
+          email: 'admin@dataflow.com',
+          password: 'admin123',
+          role: 'admin',
+          createdAt: new Date().toISOString()
+        },
+        {
+          username: 'user',
+          email: 'user@dataflow.com',
+          password: 'user123',
+          role: 'user',
+          createdAt: new Date().toISOString()
+        }
+      ];
+      
+      // Add demo users if they don't exist
+      demoUsers.forEach(demoUser => {
+        if (!existingUsers.find(u => u.username === demoUser.username)) {
+          existingUsers.push(demoUser);
+        }
+      });
+      
+      localStorage.setItem('users', JSON.stringify(existingUsers));
+    }
+  };
 
   const initializeAuth = async () => {
     // Check backend connection
@@ -79,13 +116,14 @@ export const AuthProvider = ({ children }) => {
         if (user) {
           const userData = {
             username: user.username,
-            role: user.role
+            role: user.role,
+            email: user.email
           };
           setUser(userData);
           localStorage.setItem('token', JSON.stringify(userData));
           return { success: true };
         } else {
-          return { success: false, message: 'Invalid credentials' };
+          return { success: false, message: 'Invalid credentials or role mismatch' };
         }
       }
     } catch (error) {

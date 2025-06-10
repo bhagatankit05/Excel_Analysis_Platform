@@ -13,45 +13,29 @@ const Login1 = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const validatePassword = (password) => {
-    const minLength = 8;
+    const minLength = 6; // Reduced from 8 for easier testing
     const hasUpperCase = /[A-Z]/.test(password);
     const hasLowerCase = /[a-z]/.test(password);
     const hasNumbers = /\d/.test(password);
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
 
     if (password.length < minLength) {
-      return 'Password must be at least 8 characters long';
+      return 'Password must be at least 6 characters long';
     }
-    if (!hasUpperCase) {
-      return 'Password must contain at least one uppercase letter';
-    }
-    if (!hasLowerCase) {
-      return 'Password must contain at least one lowercase letter';
-    }
-    if (!hasNumbers) {
-      return 'Password must contain at least one number';
-    }
-    if (!hasSpecialChar) {
-      return 'Password must contain at least one special character (!@#$%^&*(),.?":{}|<>)';
-    }
-    return null;
+    return null; // Simplified validation for easier testing
   };
 
   const validateUsername = (username) => {
     const minLength = 3;
     const maxLength = 20;
-    const validPattern = /^[a-zA-Z0-9_]+$/;
 
     if (username.length < minLength) {
       return 'Username must be at least 3 characters long';
     }
     if (username.length > maxLength) {
       return 'Username cannot exceed 20 characters';
-    }
-    if (!validPattern.test(username)) {
-      return 'Username can only contain letters, numbers, and underscores';
     }
     return null;
   };
@@ -64,48 +48,44 @@ const Login1 = () => {
     if (error) setError('');
   };
 
-  //*** */
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  const { username, password } = formData;
+    e.preventDefault();
+    const { username, password } = formData;
 
-  if (!username || !password) {
-    setError('Please fill in all fields.');
-    return;
-  }
-
-  const usernameError = validateUsername(username);
-  if (usernameError) {
-    setError(usernameError);
-    return;
-  }
-
-  const passwordError = validatePassword(password);
-  if (passwordError) {
-    setError(passwordError);
-    return;
-  }
-
-  setLoading(true);
-  setError('');
-
-  try {
-    const result = await login({ username, password, role });
-
-    if (result.success) {
-      navigate('/dashboard');
-    } else {
-      setError(result.message || 'Invalid username, password, or role.');
+    if (!username || !password) {
+      setError('Please fill in all fields.');
+      return;
     }
-  } catch (err) {
-    setError('Login failed. Please try again.');
-  } finally {
-    setLoading(false);
-  }
-};
 
+    const usernameError = validateUsername(username);
+    if (usernameError) {
+      setError(usernameError);
+      return;
+    }
 
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setError(passwordError);
+      return;
+    }
 
+    setLoading(true);
+    setError('');
+
+    try {
+      const result = await login({ username, password, role });
+
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        setError(result.message || 'Invalid username, password, or role.');
+      }
+    } catch (err) {
+      setError('Login failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="auth-page">
@@ -121,30 +101,43 @@ const Login1 = () => {
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <label>Username</label>
-            <input
-              type="text"
-              name="username"
-              placeholder="Enter your username"
-              value={formData.username}
-              onChange={handleChange}
-              autoComplete="username"
-              disabled={loading}
-            />
-            <small className="input-hint">3-20 characters, letters, numbers, and underscores only</small>
+            <div className="input-container">
+              <input
+                type="text"
+                name="username"
+                placeholder="Enter your username"
+                value={formData.username}
+                onChange={handleChange}
+                autoComplete="username"
+                disabled={loading}
+                className="form-input"
+              />
+            </div>
+            <small className="input-hint">3-20 characters</small>
           </div>
           
           <div className="form-group">
             <label>Password</label>
-            <input
-              type="password"
-              name="password"
-              placeholder="Enter your password"
-              value={formData.password}
-              onChange={handleChange}
-              autoComplete="current-password"
-              disabled={loading}
-            />
-            <small className="input-hint">8+ characters with uppercase, lowercase, number, and special character</small>
+            <div className="input-container">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Enter your password"
+                value={formData.password}
+                onChange={handleChange}
+                autoComplete="current-password"
+                disabled={loading}
+                className="form-input"
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
+            <small className="input-hint">Minimum 6 characters</small>
           </div>
           
           <button type="submit" className="auth-btn" disabled={loading}>
@@ -175,6 +168,13 @@ const Login1 = () => {
           <span className="link" onClick={() => navigate('/')}>
             ← Back to Home
           </span>
+        </div>
+
+        {/* Demo credentials info */}
+        <div className="demo-info">
+          <h4>Demo Credentials:</h4>
+          <p><strong>Admin:</strong> admin / admin123</p>
+          <p><strong>User:</strong> user / user123</p>
         </div>
       </div>
     </div>

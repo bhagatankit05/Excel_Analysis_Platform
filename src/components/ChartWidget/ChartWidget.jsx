@@ -31,42 +31,68 @@ const ChartWidget = () => {
   const [chartData, setChartData] = useState(null);
 
   useEffect(() => {
+    loadChartData();
+    
+    // Listen for chart data updates
+    const handleStorageChange = () => {
+      loadChartData();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('chartDataUpdate', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('chartDataUpdate', handleStorageChange);
+    };
+  }, []);
+
+  const loadChartData = () => {
     // Load saved chart data or create sample data
     const savedData = localStorage.getItem('chartData');
     if (savedData) {
-      setChartData(JSON.parse(savedData));
+      try {
+        setChartData(JSON.parse(savedData));
+      } catch (error) {
+        console.error('Error loading chart data:', error);
+        createSampleData();
+      }
     } else {
-      // Sample data
-      const sampleData = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-        datasets: [
-          {
-            label: 'Data Analysis',
-            data: [12, 19, 3, 5, 2, 3],
-            backgroundColor: [
-              'rgba(102, 126, 234, 0.8)',
-              'rgba(118, 75, 162, 0.8)',
-              'rgba(240, 147, 251, 0.8)',
-              'rgba(245, 87, 108, 0.8)',
-              'rgba(254, 202, 87, 0.8)',
-              'rgba(72, 187, 120, 0.8)',
-            ],
-            borderColor: [
-              'rgba(102, 126, 234, 1)',
-              'rgba(118, 75, 162, 1)',
-              'rgba(240, 147, 251, 1)',
-              'rgba(245, 87, 108, 1)',
-              'rgba(254, 202, 87, 1)',
-              'rgba(72, 187, 120, 1)',
-            ],
-            borderWidth: 2,
-            borderRadius: 8,
-          },
-        ],
-      };
-      setChartData(sampleData);
+      createSampleData();
     }
-  }, []);
+  };
+
+  const createSampleData = () => {
+    // Sample data for demonstration
+    const sampleData = {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+      datasets: [
+        {
+          label: 'Sample Data',
+          data: [12, 19, 3, 5, 2, 3],
+          backgroundColor: [
+            'rgba(102, 126, 234, 0.8)',
+            'rgba(118, 75, 162, 0.8)',
+            'rgba(240, 147, 251, 0.8)',
+            'rgba(245, 87, 108, 0.8)',
+            'rgba(254, 202, 87, 0.8)',
+            'rgba(72, 187, 120, 0.8)',
+          ],
+          borderColor: [
+            'rgba(102, 126, 234, 1)',
+            'rgba(118, 75, 162, 1)',
+            'rgba(240, 147, 251, 1)',
+            'rgba(245, 87, 108, 1)',
+            'rgba(254, 202, 87, 1)',
+            'rgba(72, 187, 120, 1)',
+          ],
+          borderWidth: 2,
+          borderRadius: 8,
+        },
+      ],
+    };
+    setChartData(sampleData);
+  };
 
   const chartOptions = {
     responsive: true,
@@ -119,7 +145,14 @@ const ChartWidget = () => {
   };
 
   const renderChart = () => {
-    if (!chartData) return <div className="chart-loading">Loading chart...</div>;
+    if (!chartData) {
+      return (
+        <div className="chart-loading">
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>📊</div>
+          <p>Upload Excel data to see visualization</p>
+        </div>
+      );
+    }
 
     switch (chartType) {
       case 'line':

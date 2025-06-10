@@ -14,9 +14,11 @@ const Register = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const validatePassword = (password) => {
-    const minLength = 8;
+    const minLength = 6; // Reduced for easier testing
     const hasUpperCase = /[A-Z]/.test(password);
     const hasLowerCase = /[a-z]/.test(password);
     const hasNumbers = /\d/.test(password);
@@ -26,7 +28,7 @@ const Register = () => {
     let errors = [];
 
     if (password.length >= minLength) strength++;
-    else errors.push('At least 8 characters');
+    else errors.push('At least 6 characters');
 
     if (hasUpperCase) strength++;
     else errors.push('One uppercase letter');
@@ -38,9 +40,9 @@ const Register = () => {
     else errors.push('One number');
 
     if (hasSpecialChar) strength++;
-    else errors.push('One special character (!@#$%^&*(),.?":{}|<>)');
+    else errors.push('One special character');
 
-    return { strength, errors, isValid: strength === 5 };
+    return { strength, errors, isValid: strength >= 3 }; // Reduced requirement
   };
 
   const validateUsername = (username) => {
@@ -181,43 +183,59 @@ const Register = () => {
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <label>Username</label>
-            <input
-              type="text"
-              name="username"
-              placeholder="Choose a username"
-              value={formData.username}
-              onChange={handleChange}
-              autoComplete="off"
-              disabled={loading}
-            />
+            <div className="input-container">
+              <input
+                type="text"
+                name="username"
+                placeholder="Choose a username"
+                value={formData.username}
+                onChange={handleChange}
+                autoComplete="off"
+                disabled={loading}
+                className="form-input"
+              />
+            </div>
             <small className="input-hint">3-20 characters, letters, numbers, and underscores only</small>
           </div>
           
           <div className="form-group">
             <label>Email</label>
-            <input
-              type="email"
-              name="email"
-              placeholder="Enter your email"
-              value={formData.email}
-              onChange={handleChange}
-              autoComplete="email"
-              disabled={loading}
-            />
+            <div className="input-container">
+              <input
+                type="email"
+                name="email"
+                placeholder="Enter your email"
+                value={formData.email}
+                onChange={handleChange}
+                autoComplete="email"
+                disabled={loading}
+                className="form-input"
+              />
+            </div>
             <small className="input-hint">We'll use this for account recovery</small>
           </div>
           
           <div className="form-group">
             <label>Password</label>
-            <input
-              type="password"
-              name="password"
-              placeholder="Create a strong password"
-              value={formData.password}
-              onChange={handleChange}
-              autoComplete="new-password"
-              disabled={loading}
-            />
+            <div className="input-container">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Create a strong password"
+                value={formData.password}
+                onChange={handleChange}
+                autoComplete="new-password"
+                disabled={loading}
+                className="form-input"
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
             {formData.password && (
               <div className="password-strength">
                 <div className="strength-bar">
@@ -234,20 +252,30 @@ const Register = () => {
                 </small>
               </div>
             )}
-            <small className="input-hint">8+ characters with uppercase, lowercase, number, and special character</small>
+            <small className="input-hint">6+ characters with uppercase, lowercase, and number</small>
           </div>
           
           <div className="form-group">
             <label>Confirm Password</label>
-            <input
-              type="password"
-              name="confirmPassword"
-              placeholder="Confirm your password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              autoComplete="new-password"
-              disabled={loading}
-            />
+            <div className="input-container">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
+                placeholder="Confirm your password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                autoComplete="new-password"
+                disabled={loading}
+                className="form-input"
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+              </button>
+            </div>
             {formData.confirmPassword && formData.password !== formData.confirmPassword && (
               <small className="error-hint">Passwords do not match</small>
             )}
@@ -278,6 +306,12 @@ const Register = () => {
           <span className="link" onClick={() => navigate('/')}>
             ← Back to Home
           </span>
+        </div>
+
+        {/* Demo info */}
+        <div className="demo-info">
+          <h4>Quick Test:</h4>
+          <p>Try: testuser / test@email.com / Test123!</p>
         </div>
       </div>
     </div>

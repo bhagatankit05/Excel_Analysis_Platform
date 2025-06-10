@@ -90,6 +90,171 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.chart-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.chart-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.chart-btn {
+  padding: 8px 12px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  color: #718096;
+}
+
+.chart-btn:hover {
+  background: #f7fafc;
+  border-color: #cbd5e0;
+}
+
+.chart-btn.active {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+  border-color: transparent;
+}
+
+.chart-container {
+  flex: 1;
+  position: relative;
+  min-height: 300px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 12px;
+}
+
+/* Upload Modal Styles */
+.upload-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.upload-modal {
+  background: white;
+  border-radius: 16px;
+  padding: 0;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid #e2e8f0;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.modal-content {
+  padding: 32px;
+}
+
+.upload-area {
+  text-align: center;
+  padding: 32px;
+  border: 2px dashed #e2e8f0;
+  border-radius: 12px;
+  background: #fafafa;
+}
+
+.upload-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.7;
+}
+
+.upload-area h4 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0 0 8px 0;
+}
+
+.upload-area p {
+  color: #718096;
+  margin: 0 0 16px 0;
+}
+
+.upload-note {
+  font-size: 12px !important;
+  color: #a0aec0 !important;
+  margin-top: 8px !important;
+}
+
+.loading-section {
+  text-align: center;
+  padding: 40px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e2e8f0;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 @media (max-width: 1024px) {
   .dashboard-content {
     grid-template-columns: 1fr;
@@ -113,5 +278,32 @@
   
   .action-btn {
     flex: 1;
+  }
+
+  .chart-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+  }
+  
+  .chart-controls {
+    justify-content: center;
+  }
+  
+  .chart-btn {
+    flex: 1;
+  }
+
+  .upload-modal {
+    width: 95%;
+    margin: 16px;
+  }
+
+  .modal-content {
+    padding: 24px;
+  }
+
+  .upload-area {
+    padding: 24px;
   }
 }
