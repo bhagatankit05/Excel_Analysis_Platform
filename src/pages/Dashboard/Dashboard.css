@@ -109,6 +109,7 @@
 .chart-controls {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .chart-btn {
@@ -141,6 +142,133 @@
   padding: 16px;
   background: #fafafa;
   border-radius: 12px;
+}
+
+/* AI Report Section */
+.ai-report-section {
+  margin-top: 24px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.report-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.report-timestamp {
+  font-size: 12px;
+  color: #718096;
+}
+
+.report-stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.insight-card {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.insight-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.insight-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.insight-type {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.confidence-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: #48bb78;
+  background: rgba(72, 187, 120, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.insight-card h5 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a202c;
+}
+
+.insight-card p {
+  margin: 0;
+  font-size: 12px;
+  color: #4a5568;
+  line-height: 1.4;
+}
+
+.generating-report {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  background: #f7fafc;
+  border-radius: 8px;
+  margin-top: 16px;
+  color: #718096;
+  font-style: italic;
 }
 
 /* Upload Modal Styles */
@@ -305,5 +433,14 @@
 
   .upload-area {
     padding: 24px;
+  }
+
+  .insights-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .report-stats {
+    flex-direction: column;
+    gap: 12px;
   }
 }

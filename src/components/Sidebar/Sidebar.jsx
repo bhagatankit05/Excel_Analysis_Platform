@@ -6,26 +6,28 @@ import './Sidebar.css';
 const Sidebar = () => {
   const { user, logout, isAdmin } = useAuth();
 
-  const adminMenuItems = [
-    { path: '/dashboard', icon: '📊', label: 'Analytics Hub' },
+  const coreMenuItems = [
+    { path: '/dashboard', icon: '📊', label: 'Analytics Hub', badge: 'NEW' },
     { path: '/upload', icon: '📤', label: 'Data Ingestion' },
-    { path: '/analyze', icon: '🔍', label: 'Deep Analysis' },
-    { path: '/reports', icon: '📈', label: 'Intelligence Reports' },
-    { path: '/users', icon: '👥', label: 'User Management' },
-    { path: '/ai-insights', icon: '🧠', label: 'AI Insights' },
-    { path: '/settings', icon: '⚙️', label: 'System Config' }
+    { path: '/ai-insights', icon: '🧠', label: 'AI Insights', badge: 'AI' }
   ];
 
-  const userMenuItems = [
-    { path: '/dashboard', icon: '📊', label: 'Analytics Hub' },
-    { path: '/upload', icon: '📤', label: 'Data Upload' },
-    { path: '/analyze', icon: '🔍', label: 'Data Analysis' },
-    { path: '/reports', icon: '📈', label: 'My Reports' },
-    { path: '/ai-insights', icon: '🧠', label: 'AI Insights' },
+  const analysisMenuItems = [
+    { path: '/reports', icon: '📈', label: 'Smart Reports' },
+    { path: '/analyze', icon: '🔍', label: 'Deep Analysis' },
     { path: '/history', icon: '📋', label: 'Activity Log' }
   ];
 
-  const menuItems = isAdmin ? adminMenuItems : userMenuItems;
+  const adminMenuItems = [
+    { path: '/users', icon: '👥', label: 'User Management' },
+    { path: '/settings', icon: '⚙️', label: 'System Config' },
+    { path: '/monitoring', icon: '📡', label: 'System Monitor' }
+  ];
+
+  const supportMenuItems = [
+    { path: '/contact', icon: '💬', label: 'Support' },
+    { path: '/about', icon: 'ℹ️', label: 'About' }
+  ];
 
   return (
     <div className="sidebar">
@@ -40,22 +42,75 @@ const Sidebar = () => {
           </div>
           <div className="user-details">
             <span className="username">{user?.username}</span>
-            <span className="user-role">{user?.role === 'admin' ? 'System Admin' : 'Data Analyst'}</span>
+            <span className="user-role">
+              {user?.role === 'admin' ? 'System Admin' : 'Data Analyst'}
+            </span>
           </div>
         </div>
       </div>
 
       <nav className="sidebar-nav">
-        {menuItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-          >
-            <span className="nav-icon">{item.icon}</span>
-            <span className="nav-label">{item.label}</span>
-          </NavLink>
-        ))}
+        <div className="nav-section">
+          <div className="nav-section-title">Core Platform</div>
+          {coreMenuItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              <span className="nav-label">{item.label}</span>
+              {item.badge && <span className="nav-badge">{item.badge}</span>}
+            </NavLink>
+          ))}
+        </div>
+
+        <div className="nav-section">
+          <div className="nav-section-title">Analysis Tools</div>
+          {analysisMenuItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              <span className="nav-label">{item.label}</span>
+              {item.badge && <span className="nav-badge">{item.badge}</span>}
+            </NavLink>
+          ))}
+        </div>
+
+        {isAdmin && (
+          <div className="nav-section">
+            <div className="nav-section-title">Administration</div>
+            {adminMenuItems.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+              >
+                <span className="nav-icon">{item.icon}</span>
+                <span className="nav-label">{item.label}</span>
+                {item.badge && <span className="nav-badge">{item.badge}</span>}
+              </NavLink>
+            ))}
+          </div>
+        )}
+
+        <div className="nav-section">
+          <div className="nav-section-title">Support</div>
+          {supportMenuItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              <span className="nav-label">{item.label}</span>
+              {item.badge && <span className="nav-badge">{item.badge}</span>}
+            </NavLink>
+          ))}
+        </div>
       </nav>
 
       <div className="sidebar-footer">

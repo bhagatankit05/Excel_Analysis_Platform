@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import StatsCard from '../../components/StatsCard/StatsCard';
-import ChartWidget from '../../components/ChartWidget/ChartWidget';
 import RecentActivity from '../../components/RecentActivity/RecentActivity';
+import ReportGenerator from '../../components/ReportGenerator/ReportGenerator';
 import * as XLSX from 'xlsx';
-import { Bar, Line, Doughnut } from 'react-chartjs-2';
+import { Bar, Line, Doughnut, Pie, Radar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -14,6 +14,7 @@ import {
   LineElement,
   PointElement,
   ArcElement,
+  RadialLinearScale,
   Title,
   Tooltip,
   Legend,
@@ -28,6 +29,7 @@ ChartJS.register(
   LineElement,
   PointElement,
   ArcElement,
+  RadialLinearScale,
   Title,
   Tooltip,
   Legend
@@ -37,6 +39,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { user, isAdmin } = useAuth();
   const fileInputRef = useRef(null);
+  const chartRef = useRef(null);
   const [stats, setStats] = useState({
     totalFiles: 0,
     totalAnalyses: 0,
@@ -48,6 +51,16 @@ const Dashboard = () => {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [aiReport, setAiReport] = useState(null);
+  const [generatingReport, setGeneratingReport] = useState(false);
+
+  const chartTypes = [
+    { id: 'bar', name: 'Bar Chart', icon: '📊' },
+    { id: 'line', name: 'Line Chart', icon: '📈' },
+    { id: 'doughnut', name: 'Doughnut', icon: '🍩' },
+    { id: 'pie', name: 'Pie Chart', icon: '🥧' },
+    { id: 'radar', name: 'Radar Chart', icon: '🎯' }
+  ];
 
   useEffect(() => {
     loadDashboardData();
@@ -76,10 +89,84 @@ const Dashboard = () => {
     const savedChartData = localStorage.getItem('chartData');
     if (savedChartData) {
       try {
-        setChartData(JSON.parse(savedChartData));
+        const data = JSON.parse(savedChartData);
+        setChartData(data);
+        generateAIReport(data);
       } catch (error) {
         console.error('Error loading chart data:', error);
       }
+    }
+  };
+
+  const generateAIReport = async (data) => {
+    if (!data || !data.datasets || data.datasets.length === 0) return;
+
+    setGeneratingReport(true);
+    
+    try {
+      // Simulate AI analysis
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const values = data.datasets[0].data;
+      const labels = data.labels;
+      
+      // Calculate statistics
+      const total = values.reduce((acc, val) => acc + val, 0);
+      const average = total / values.length;
+      const max = Math.max(...values);
+      const min = Math.min(...values);
+      const maxIndex = values.indexOf(max);
+      const minIndex = values.indexOf(min);
+      
+      // Generate insights
+      const insights = [
+        {
+          type: 'summary',
+          title: 'Data Overview',
+          description: `Dataset contains ${values.length} data points with a total value of ${total.toFixed(2)}`,
+          confidence: 100
+        },
+        {
+          type: 'trend',
+          title: 'Performance Analysis',
+          description: `Average value is ${average.toFixed(2)}. Highest performer: ${labels[maxIndex]} (${max})`,
+          confidence: 95
+        },
+        {
+          type: 'insight',
+          title: 'Key Finding',
+          description: `${((max - min) / average * 100).toFixed(1)}% variance detected. ${labels[maxIndex]} outperforms ${labels[minIndex]} by ${((max - min) / min * 100).toFixed(1)}%`,
+          confidence: 88
+        },
+        {
+          type: 'recommendation',
+          title: 'Strategic Recommendation',
+          description: values.some(v => v > average * 1.5) 
+            ? 'Focus resources on top performers to maximize ROI'
+            : 'Consider optimization strategies to improve overall performance',
+          confidence: 82
+        }
+      ];
+
+      const report = {
+        timestamp: new Date().toISOString(),
+        dataPoints: values.length,
+        statistics: { total, average, max, min },
+        insights,
+        recommendations: [
+          'Monitor high-performing segments for scalability opportunities',
+          'Investigate underperforming areas for improvement potential',
+          'Consider data-driven resource allocation based on performance metrics'
+        ]
+      };
+
+      setAiReport(report);
+      addActivity('ai_insight', 'Generated AI report from dashboard data', `${insights.length} insights created`);
+      
+    } catch (error) {
+      console.error('Error generating AI report:', error);
+    } finally {
+      setGeneratingReport(false);
     }
   };
 
@@ -134,6 +221,9 @@ const Dashboard = () => {
       uploadedFiles.push(fileRecord);
       localStorage.setItem('uploadedFiles', JSON.stringify(uploadedFiles));
       localStorage.setItem('chartData', JSON.stringify(processedData.chartData));
+
+      // Generate AI report for new data
+      generateAIReport(processedData.chartData);
 
       // Update stats
       loadDashboardData();
@@ -196,6 +286,7 @@ const Dashboard = () => {
         borderColor: colors.map(color => color.replace('0.8', '1')),
         borderWidth: 2,
         borderRadius: 8,
+        tension: 0.4
       }]
     };
 
@@ -218,7 +309,7 @@ const Dashboard = () => {
           flexDirection: 'column',
           alignItems: 'center', 
           justifyContent: 'center', 
-          height: '300px',
+          height: '400px',
           color: '#718096'
         }}>
           <div style={{ fontSize: '48px', marginBottom: '16px' }}>📊</div>
@@ -260,7 +351,7 @@ const Dashboard = () => {
           padding: 20
         }
       },
-      scales: chartType !== 'doughnut' ? {
+      scales: !['doughnut', 'pie', 'radar'].includes(chartType) ? {
         y: {
           beginAtZero: true,
           grid: { color: 'rgba(0, 0, 0, 0.05)' },
@@ -270,17 +361,24 @@ const Dashboard = () => {
           grid: { display: false },
           ticks: { font: { size: 11 } }
         }
+      } : chartType === 'radar' ? {
+        r: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0, 0, 0, 0.1)' },
+          ticks: { font: { size: 10 } }
+        }
       } : {}
     };
 
-    switch (chartType) {
-      case 'line':
-        return <Line data={chartData} options={chartOptions} />;
-      case 'doughnut':
-        return <Doughnut data={chartData} options={chartOptions} />;
-      default:
-        return <Bar data={chartData} options={chartOptions} />;
-    }
+    const ChartComponent = {
+      bar: Bar,
+      line: Line,
+      doughnut: Doughnut,
+      pie: Pie,
+      radar: Radar
+    }[chartType];
+
+    return <ChartComponent ref={chartRef} data={chartData} options={chartOptions} />;
   };
 
   const adminStats = [
@@ -327,36 +425,88 @@ const Dashboard = () => {
       <div className="dashboard-content">
         <div className="charts-section">
           <div className="chart-header">
-            <h3>📊 Data Visualization</h3>
+            <h3>📊 Data Visualization Hub</h3>
             <div className="chart-controls">
-              <button
-                className={`chart-btn ${chartType === 'bar' ? 'active' : ''}`}
-                onClick={() => setChartType('bar')}
-              >
-                📊 Bar
-              </button>
-              <button
-                className={`chart-btn ${chartType === 'line' ? 'active' : ''}`}
-                onClick={() => setChartType('line')}
-              >
-                📈 Line
-              </button>
-              <button
-                className={`chart-btn ${chartType === 'doughnut' ? 'active' : ''}`}
-                onClick={() => setChartType('doughnut')}
-              >
-                🍩 Doughnut
-              </button>
+              {chartTypes.map(type => (
+                <button
+                  key={type.id}
+                  className={`chart-btn ${chartType === type.id ? 'active' : ''}`}
+                  onClick={() => setChartType(type.id)}
+                >
+                  {type.icon} {type.name}
+                </button>
+              ))}
             </div>
           </div>
           <div className="chart-container" style={{ height: '400px', position: 'relative' }}>
             {renderChart()}
           </div>
+          
+          {/* AI Report Section */}
+          {aiReport && (
+            <div className="ai-report-section">
+              <div className="report-header">
+                <h4>🧠 AI Analysis Report</h4>
+                <span className="report-timestamp">
+                  Generated: {new Date(aiReport.timestamp).toLocaleString()}
+                </span>
+              </div>
+              
+              <div className="report-stats">
+                <div className="stat-item">
+                  <span className="stat-value">{aiReport.dataPoints}</span>
+                  <span className="stat-label">Data Points</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-value">{aiReport.statistics.average.toFixed(2)}</span>
+                  <span className="stat-label">Average</span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-value">{aiReport.statistics.max}</span>
+                  <span className="stat-label">Peak Value</span>
+                </div>
+              </div>
+
+              <div className="insights-grid">
+                {aiReport.insights.map((insight, index) => (
+                  <div key={index} className="insight-card">
+                    <div className="insight-header">
+                      <span className="insight-type">{insight.type}</span>
+                      <span className="confidence-badge">{insight.confidence}%</span>
+                    </div>
+                    <h5>{insight.title}</h5>
+                    <p>{insight.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {generatingReport && (
+            <div className="generating-report">
+              <div className="loading-spinner"></div>
+              <span>AI is analyzing your data...</span>
+            </div>
+          )}
         </div>
+        
         <div className="activity-section">
           <RecentActivity />
         </div>
       </div>
+
+      {/* Report Generator */}
+      {chartData && (
+        <ReportGenerator 
+          data={{
+            rowCount: stats.totalFiles,
+            columnCount: 5,
+            fileName: uploadedFile?.name || 'Dashboard Data'
+          }}
+          chartRef={chartRef}
+          insights={aiReport?.insights || []}
+        />
+      )}
 
       {/* Upload Modal */}
       {showUploadModal && (
