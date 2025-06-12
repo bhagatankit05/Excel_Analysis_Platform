@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Bar, Line, Doughnut, Pie, Radar, PolarArea } from 'react-chartjs-2';
+import PlotlyChart from '../../components/PlotlyChart/PlotlyChart';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -39,6 +40,7 @@ const AIInsights = () => {
   const [chartData, setChartData] = useState(null);
   const [chartType, setChartType] = useState('bar');
   const [uploadedData, setUploadedData] = useState(null);
+  const [showPlotly, setShowPlotly] = useState(false);
 
   const aiModels = [
     { id: 'gpt-4', name: 'GPT-4 Turbo', description: 'Advanced language model for complex analysis' },
@@ -72,21 +74,25 @@ const AIInsights = () => {
 
   const loadUploadedData = () => {
     const files = JSON.parse(localStorage.getItem('uploadedFiles')) || [];
+    const rawData = JSON.parse(localStorage.getItem('rawData')) || null;
+    
     if (files.length > 0) {
       const latestFile = files[files.length - 1];
       setUploadedData(latestFile);
-      generateChartData(latestFile.data);
+      if (rawData) {
+        generateChartData(rawData);
+      } else if (latestFile.data) {
+        generateChartData(latestFile.data);
+      }
     }
   };
 
   const generateChartData = (data) => {
     if (!data || data.length === 0) return;
 
-    // Take first 10 rows for visualization
     const chartData = data.slice(0, 10);
     const keys = Object.keys(chartData[0] || {});
     
-    // Find numeric columns
     const numericColumns = keys.filter(key => {
       return chartData.every(row => !isNaN(parseFloat(row[key])));
     });
@@ -129,7 +135,6 @@ const AIInsights = () => {
   const generateInsights = async () => {
     setLoading(true);
     
-    // Simulate AI processing
     await new Promise(resolve => setTimeout(resolve, 2000));
     
     const sampleInsights = [
@@ -198,7 +203,6 @@ const AIInsights = () => {
     setInsights(sampleInsights);
     setLoading(false);
 
-    // Add activity
     addActivity('ai_insight', `Generated ${sampleInsights.length} AI insights`, `Using ${selectedModel} model`);
   };
 
@@ -212,7 +216,6 @@ const AIInsights = () => {
       link.href = canvas.toDataURL();
       link.click();
     } else if (format === 'pdf') {
-      // For PDF, we'll use a simple approach
       const link = document.createElement('a');
       link.download = `chart-${Date.now()}.pdf`;
       link.href = canvas.toDataURL();
@@ -335,12 +338,23 @@ const AIInsights = () => {
         </div>
       </div>
 
-      {/* Chart Visualization Section */}
       <div className="chart-section">
         <div className="chart-header">
           <h3>📊 Data Visualization</h3>
           <div className="chart-controls">
-            {chartTypes.map(type => (
+            <button
+              className={`chart-btn ${!showPlotly ? 'active' : ''}`}
+              onClick={() => setShowPlotly(false)}
+            >
+              📊 Chart.js
+            </button>
+            <button
+              className={`chart-btn ${showPlotly ? 'active' : ''}`}
+              onClick={() => setShowPlotly(true)}
+            >
+              🎯 3D Plots
+            </button>
+            {!showPlotly && chartTypes.map(type => (
               <button
                 key={type.id}
                 className={`chart-btn ${chartType === type.id ? 'active' : ''}`}
@@ -353,7 +367,11 @@ const AIInsights = () => {
         </div>
         
         <div className="chart-container">
-          {renderChart()}
+          {showPlotly ? (
+            <PlotlyChart data={JSON.parse(localStorage.getItem('rawData')) || uploadedData?.data} />
+          ) : (
+            renderChart()
+          )}
         </div>
         
         <div className="chart-actions">

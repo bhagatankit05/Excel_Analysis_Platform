@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import StatsCard from '../../components/StatsCard/StatsCard';
 import RecentActivity from '../../components/RecentActivity/RecentActivity';
 import ReportGenerator from '../../components/ReportGenerator/ReportGenerator';
+import PlotlyChart from '../../components/PlotlyChart/PlotlyChart';
 import * as XLSX from 'xlsx';
 import { Bar, Line, Doughnut, Pie, Radar } from 'react-chartjs-2';
 import {
@@ -47,12 +48,14 @@ const Dashboard = () => {
     recentUploads: 0
   });
   const [chartData, setChartData] = useState(null);
+  const [rawData, setRawData] = useState(null);
   const [chartType, setChartType] = useState('bar');
   const [uploadedFile, setUploadedFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [aiReport, setAiReport] = useState(null);
   const [generatingReport, setGeneratingReport] = useState(false);
+  const [showPlotly, setShowPlotly] = useState(false);
 
   const chartTypes = [
     { id: 'bar', name: 'Bar Chart', icon: '📊' },
@@ -87,6 +90,8 @@ const Dashboard = () => {
 
   const loadExistingChartData = () => {
     const savedChartData = localStorage.getItem('chartData');
+    const savedRawData = localStorage.getItem('rawData');
+    
     if (savedChartData) {
       try {
         const data = JSON.parse(savedChartData);
@@ -94,6 +99,15 @@ const Dashboard = () => {
         generateAIReport(data);
       } catch (error) {
         console.error('Error loading chart data:', error);
+      }
+    }
+    
+    if (savedRawData) {
+      try {
+        const data = JSON.parse(savedRawData);
+        setRawData(data);
+      } catch (error) {
+        console.error('Error loading raw data:', error);
       }
     }
   };
@@ -104,13 +118,11 @@ const Dashboard = () => {
     setGeneratingReport(true);
     
     try {
-      // Simulate AI analysis
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       const values = data.datasets[0].data;
       const labels = data.labels;
       
-      // Calculate statistics
       const total = values.reduce((acc, val) => acc + val, 0);
       const average = total / values.length;
       const max = Math.max(...values);
@@ -118,7 +130,6 @@ const Dashboard = () => {
       const maxIndex = values.indexOf(max);
       const minIndex = values.indexOf(min);
       
-      // Generate insights
       const insights = [
         {
           type: 'summary',
@@ -203,11 +214,10 @@ const Dashboard = () => {
         return;
       }
 
-      // Process data for charts
       const processedData = processExcelData(jsonData);
       setChartData(processedData.chartData);
+      setRawData(jsonData);
 
-      // Save to localStorage
       const uploadedFiles = JSON.parse(localStorage.getItem('uploadedFiles')) || [];
       const fileRecord = {
         id: Date.now(),
@@ -221,14 +231,11 @@ const Dashboard = () => {
       uploadedFiles.push(fileRecord);
       localStorage.setItem('uploadedFiles', JSON.stringify(uploadedFiles));
       localStorage.setItem('chartData', JSON.stringify(processedData.chartData));
+      localStorage.setItem('rawData', JSON.stringify(jsonData));
 
-      // Generate AI report for new data
       generateAIReport(processedData.chartData);
-
-      // Update stats
       loadDashboardData();
 
-      // Add activity
       addActivity('upload', `Uploaded file: ${file.name}`, `${jsonData.length} rows processed`);
 
       alert('File uploaded and processed successfully!');
@@ -247,7 +254,6 @@ const Dashboard = () => {
   };
 
   const processExcelData = (jsonData) => {
-    // Find the first two columns for chart data
     const keys = Object.keys(jsonData[0] || {});
     if (keys.length < 2) {
       throw new Error('Excel file must have at least 2 columns');
@@ -256,14 +262,12 @@ const Dashboard = () => {
     const labelColumn = keys[0];
     const valueColumn = keys[1];
 
-    // Extract labels and values
     const labels = jsonData.slice(0, 10).map(row => String(row[labelColumn] || 'Unknown'));
     const values = jsonData.slice(0, 10).map(row => {
       const val = parseFloat(row[valueColumn]);
       return isNaN(val) ? 0 : val;
     });
 
-    // Generate colors
     const colors = [
       'rgba(102, 126, 234, 0.8)',
       'rgba(118, 75, 162, 0.8)',
@@ -427,7 +431,19 @@ const Dashboard = () => {
           <div className="chart-header">
             <h3>📊 Data Visualization Hub</h3>
             <div className="chart-controls">
-              {chartTypes.map(type => (
+              <button
+                className={`chart-btn ${!showPlotly ? 'active' : ''}`}
+                onClick={() => setShowPlotly(false)}
+              >
+                📊 Chart.js
+              </button>
+              <button
+                className={`chart-btn ${showPlotly ? 'active' : ''}`}
+                onClick={() => setShowPlotly(true)}
+              >
+                🎯 3D Plots
+              </button>
+              {!showPlotly && chartTypes.map(type => (
                 <button
                   key={type.id}
                   className={`chart-btn ${chartType === type.id ? 'active' : ''}`}
@@ -438,11 +454,15 @@ const Dashboard = () => {
               ))}
             </div>
           </div>
-          <div className="chart-container" style={{ height: '400px', position: 'relative' }}>
-            {renderChart()}
-          </div>
           
-          {/* AI Report Section */}
+          {showPlotly ? (
+            <PlotlyChart data={rawData} />
+          ) : (
+            <div className="chart-container" style={{ height: '400px', position: 'relative' }}>
+              {renderChart()}
+            </div>
+          )}
+          
           {aiReport && (
             <div className="ai-report-section">
               <div className="report-header">
@@ -495,20 +515,19 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Report Generator */}
       {chartData && (
         <ReportGenerator 
           data={{
             rowCount: stats.totalFiles,
             columnCount: 5,
-            fileName: uploadedFile?.name || 'Dashboard Data'
+            fileName: uploadedFile?.name || 'Dashboard Data',
+            fullData: rawData
           }}
           chartRef={chartRef}
           insights={aiReport?.insights || []}
         />
       )}
 
-      {/* Upload Modal */}
       {showUploadModal && (
         <div className="upload-modal-overlay" onClick={() => setShowUploadModal(false)}>
           <div className="upload-modal" onClick={(e) => e.stopPropagation()}>

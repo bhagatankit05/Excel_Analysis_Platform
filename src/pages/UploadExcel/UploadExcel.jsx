@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import * as XLSX from 'xlsx';
+import PlotlyChart from '../../components/PlotlyChart/PlotlyChart';
 import { addActivity } from '../../components/RecentActivity/RecentActivity';
 import './UploadExcel.css';
 
@@ -7,9 +8,11 @@ const UploadExcel = () => {
   const [dragActive, setDragActive] = useState(false);
   const [uploadedFile, setUploadedFile] = useState(null);
   const [fileData, setFileData] = useState(null);
+  const [rawData, setRawData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisResults, setAnalysisResults] = useState(null);
+  const [showPlotly, setShowPlotly] = useState(false);
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -59,14 +62,14 @@ const UploadExcel = () => {
         sheets: workbook.SheetNames,
         rowCount: jsonData.length,
         columnCount: Object.keys(jsonData[0] || {}).length,
-        data: jsonData.slice(0, 10), // Preview first 10 rows
+        data: jsonData.slice(0, 10),
         fullData: jsonData,
         uploadTime: new Date().toISOString()
       };
 
       setFileData(processedData);
+      setRawData(jsonData);
 
-      // Save to localStorage
       const uploadedFiles = JSON.parse(localStorage.getItem('uploadedFiles')) || [];
       const fileRecord = {
         id: Date.now(),
@@ -79,8 +82,8 @@ const UploadExcel = () => {
       };
       uploadedFiles.push(fileRecord);
       localStorage.setItem('uploadedFiles', JSON.stringify(uploadedFiles));
+      localStorage.setItem('rawData', JSON.stringify(jsonData));
 
-      // Add activity
       addActivity('upload', `Uploaded file: ${file.name}`, `${jsonData.length} rows, ${Object.keys(jsonData[0] || {}).length} columns`);
 
     } catch (error) {
@@ -98,14 +101,12 @@ const UploadExcel = () => {
     setAnalyzing(true);
     
     try {
-      // Simulate AI analysis
       await new Promise(resolve => setTimeout(resolve, 3000));
       
       const data = fileData.fullData;
       const numericColumns = [];
       const textColumns = [];
       
-      // Analyze column types
       if (data.length > 0) {
         Object.keys(data[0]).forEach(column => {
           const sampleValues = data.slice(0, 10).map(row => row[column]);
@@ -119,7 +120,6 @@ const UploadExcel = () => {
         });
       }
 
-      // Calculate statistics for numeric columns
       const statistics = {};
       numericColumns.forEach(column => {
         const values = data.map(row => parseFloat(row[column])).filter(val => !isNaN(val));
@@ -135,7 +135,6 @@ const UploadExcel = () => {
         }
       });
 
-      // Generate insights
       const insights = [
         `Dataset contains ${data.length} records with ${Object.keys(data[0] || {}).length} attributes`,
         `Found ${numericColumns.length} numeric columns and ${textColumns.length} text columns`,
@@ -169,7 +168,6 @@ const UploadExcel = () => {
 
       setAnalysisResults(results);
       
-      // Save analysis results
       const analyses = JSON.parse(localStorage.getItem('analyses')) || [];
       analyses.push({
         id: Date.now(),
@@ -180,7 +178,6 @@ const UploadExcel = () => {
       localStorage.setItem('analyses', JSON.stringify(analyses));
       localStorage.setItem('chartData', JSON.stringify(results.chartData));
 
-      // Add activity
       addActivity('analysis', `Analyzed data from ${fileData.fileName}`, `Generated ${insights.length} insights`);
 
     } catch (error) {
@@ -204,7 +201,6 @@ const UploadExcel = () => {
       };
     }
 
-    // Take first 10 rows for chart
     const chartData = data.slice(0, 10);
     const labels = chartData.map((row, index) => row[Object.keys(row)[0]] || `Row ${index + 1}`);
     const values = chartData.map(row => parseFloat(row[primaryColumn]) || 0);
@@ -322,29 +318,52 @@ const UploadExcel = () => {
               </div>
             </div>
 
-            <div className="data-preview">
-              <h3>📋 Data Preview</h3>
-              <div className="table-container">
-                <table className="preview-table">
-                  <thead>
-                    <tr>
-                      {Object.keys(fileData.data[0] || {}).map((key) => (
-                        <th key={key}>{key}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {fileData.data.map((row, index) => (
-                      <tr key={index}>
-                        {Object.values(row).map((value, i) => (
-                          <td key={i}>{String(value)}</td>
-                        ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            <div className="visualization-section">
+              <div className="viz-header">
+                <h3>📈 Data Visualization</h3>
+                <div className="viz-controls">
+                  <button
+                    className={`viz-btn ${!showPlotly ? 'active' : ''}`}
+                    onClick={() => setShowPlotly(false)}
+                  >
+                    📊 Table View
+                  </button>
+                  <button
+                    className={`viz-btn ${showPlotly ? 'active' : ''}`}
+                    onClick={() => setShowPlotly(true)}
+                  >
+                    🎯 Interactive Plots
+                  </button>
+                </div>
               </div>
-              <p className="preview-note">Showing first 10 rows of {fileData.rowCount.toLocaleString()} total rows</p>
+
+              {showPlotly ? (
+                <PlotlyChart data={rawData} />
+              ) : (
+                <div className="data-preview">
+                  <div className="table-container">
+                    <table className="preview-table">
+                      <thead>
+                        <tr>
+                          {Object.keys(fileData.data[0] || {}).map((key) => (
+                            <th key={key}>{key}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {fileData.data.map((row, index) => (
+                          <tr key={index}>
+                            {Object.values(row).map((value, i) => (
+                              <td key={i}>{String(value)}</td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <p className="preview-note">Showing first 10 rows of {fileData.rowCount.toLocaleString()} total rows</p>
+                </div>
+              )}
             </div>
 
             <div className="action-buttons">
