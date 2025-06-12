@@ -18,83 +18,83 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     initializeAuth();
-    createDemoUsers(); // Create demo users for testing
+    createDemoUsers();
   }, []);
 
   const createDemoUsers = () => {
     const existingUsers = JSON.parse(localStorage.getItem('users')) || [];
     
-    // Check if demo users already exist
-    const hasAdmin = existingUsers.find(u => u.username === 'admin');
-    const hasUser = existingUsers.find(u => u.username === 'user');
+    const demoUsers = [
+      {
+        id: 1,
+        username: 'admin',
+        email: 'admin@dataflow.com',
+        password: 'admin123',
+        role: 'admin',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 2,
+        username: 'user',
+        email: 'user@dataflow.com',
+        password: 'user123',
+        role: 'user',
+        createdAt: new Date().toISOString()
+      }
+    ];
     
-    if (!hasAdmin || !hasUser) {
-      const demoUsers = [
-        {
-          username: 'admin',
-          email: 'admin@dataflow.com',
-          password: 'admin123',
-          role: 'admin',
-          createdAt: new Date().toISOString()
-        },
-        {
-          username: 'user',
-          email: 'user@dataflow.com',
-          password: 'user123',
-          role: 'user',
-          createdAt: new Date().toISOString()
-        }
-      ];
-      
-      // Add demo users if they don't exist
-      demoUsers.forEach(demoUser => {
-        if (!existingUsers.find(u => u.username === demoUser.username)) {
-          existingUsers.push(demoUser);
-        }
-      });
-      
-      localStorage.setItem('users', JSON.stringify(existingUsers));
-    }
+    // Always ensure demo users exist with correct data
+    demoUsers.forEach(demoUser => {
+      const existingIndex = existingUsers.findIndex(u => u.username === demoUser.username);
+      if (existingIndex >= 0) {
+        // Update existing user to ensure correct role and password
+        existingUsers[existingIndex] = { ...existingUsers[existingIndex], ...demoUser };
+      } else {
+        existingUsers.push(demoUser);
+      }
+    });
+    
+    localStorage.setItem('users', JSON.stringify(existingUsers));
+    console.log('Demo users created/updated:', demoUsers);
   };
 
   const initializeAuth = async () => {
-    // Check backend connection
-    const connectionStatus = await showConnectionStatus();
-    setBackendConnected(connectionStatus.connected);
+    try {
+      // Check backend connection
+      const connectionStatus = await showConnectionStatus();
+      setBackendConnected(connectionStatus.connected);
 
-    // Try to restore user session
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        if (connectionStatus.connected) {
-          // Try to verify token with backend
-          const response = await apiClient.verifyToken();
-          if (response.success) {
-            setUser(response.user);
-          } else {
-            localStorage.removeItem('token');
-          }
-        } else {
-          // Fallback to local storage
+      // Try to restore user session
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
           const userData = JSON.parse(token);
+          console.log('Restoring user session:', userData);
           setUser(userData);
+        } catch (error) {
+          console.error('Error parsing stored token:', error);
+          localStorage.removeItem('token');
         }
-      } catch (error) {
-        console.error('Token verification failed:', error);
-        localStorage.removeItem('token');
       }
+    } catch (error) {
+      console.error('Auth initialization error:', error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const login = async (credentials) => {
     try {
+      console.log('Login attempt:', credentials);
+      
       if (backendConnected) {
         // Use backend authentication
         const response = await apiClient.login(credentials);
         if (response.success) {
           const userData = {
+            id: response.user.id,
             username: response.user.username,
+            email: response.user.email,
             role: response.user.role || credentials.role,
             token: response.token
           };
@@ -107,33 +107,54 @@ export const AuthProvider = ({ children }) => {
       } else {
         // Fallback to local storage authentication
         const users = JSON.parse(localStorage.getItem('users')) || [];
-        const user = users.find(u => 
-          u.username === credentials.username && 
-          u.password === credentials.password && 
-          u.role === credentials.role
-        );
+        console.log('Available users:', users);
+        console.log('Looking for user with credentials:', credentials);
+        
+        const user = users.find(u => {
+          const usernameMatch = u.username === credentials.username;
+          const passwordMatch = u.password === credentials.password;
+          const roleMatch = u.role === credentials.role;
+          
+          console.log(`Checking user ${u.username}:`, {
+            usernameMatch,
+            passwordMatch,
+            roleMatch,
+            userRole: u.role,
+            expectedRole: credentials.role
+          });
+          
+          return usernameMatch && passwordMatch && roleMatch;
+        });
 
         if (user) {
           const userData = {
+            id: user.id,
             username: user.username,
-            role: user.role,
-            email: user.email
+            email: user.email,
+            role: user.role
           };
+          console.log('Login successful:', userData);
           setUser(userData);
           localStorage.setItem('token', JSON.stringify(userData));
           return { success: true };
         } else {
-          return { success: false, message: 'Invalid credentials or role mismatch' };
+          console.log('Login failed: No matching user found');
+          return { 
+            success: false, 
+            message: 'Invalid username, password, or role. Please check your credentials.' 
+          };
         }
       }
     } catch (error) {
       console.error('Login error:', error);
-      return { success: false, message: error.message };
+      return { success: false, message: error.message || 'Login failed. Please try again.' };
     }
   };
 
   const register = async (userData) => {
     try {
+      console.log('Registration attempt:', userData);
+      
       if (backendConnected) {
         // Use backend registration
         const response = await apiClient.register(userData);
@@ -150,21 +171,25 @@ export const AuthProvider = ({ children }) => {
           return { success: false, message: 'Email already exists' };
         }
 
-        users.push({
+        const newUser = {
+          id: Date.now(),
           ...userData,
           createdAt: new Date().toISOString()
-        });
+        };
         
+        users.push(newUser);
         localStorage.setItem('users', JSON.stringify(users));
+        console.log('Registration successful:', newUser);
         return { success: true, message: 'Registration successful' };
       }
     } catch (error) {
       console.error('Registration error:', error);
-      return { success: false, message: error.message };
+      return { success: false, message: error.message || 'Registration failed. Please try again.' };
     }
   };
 
   const logout = () => {
+    console.log('Logging out user:', user);
     setUser(null);
     localStorage.removeItem('token');
     localStorage.removeItem('chartData');
