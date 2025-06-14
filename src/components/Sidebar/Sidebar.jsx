@@ -15,7 +15,7 @@ const Sidebar = () => {
   const analysisMenuItems = [
     { path: '/reports', icon: '📈', label: 'Smart Reports' },
     { path: '/analyze', icon: '🔍', label: 'Deep Analysis' },
-    { path: '/history', icon: '📋', label: 'Activity Log' }
+    { path: '/activity-log', icon: '📋', label: 'Activity Log' }
   ];
 
   const adminMenuItems = [
