@@ -16,8 +16,6 @@ import { useAuth } from '../../context/AuthContext';
 
 import { addActivity } from '../../components/RecentActivity/RecentActivity.jsx';
 
-import { addActivity } from '../../components/RecentActivity/RecentActivity';
-
 import './DeepAnalysis.css';
 
 ChartJS.register(
