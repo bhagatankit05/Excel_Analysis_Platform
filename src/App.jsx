@@ -1,22 +1,22 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import Layout from './component/Layout/Layout';
+import Layout from './Components/Layout/Layout';
 import ProtectedRoute from './Components/ProtectedRoute/ProtectedRoute';
 
 // Pages
 import Welcome from './Pages/Welcome/Welcome';
-import Register from './page/Register/Register';
-import Login1 from './page/Login/Login1';
-import Dashboard from './page/Dashboard/Dashboard';
-import UploadExcel from './page/UploadExcel/UploadExcel';
+import Register from './Pages/Register/Register';
+import Login1 from './Pages/Login/Login1';
+import Dashboard from './Pages/Dashboard/Dashboard';
+import UploadExcel from './Pages/UploadExcel/UploadExcel';
 import Report from './Pages/Report/Report';
 import Contact from './Pages/Contact/Contact';
 import About from './Pages/About/About';
 import ForgotPassword from './Pages/ForgotPassword/ForgotPassword';
-import AIInsights from './page/AIInsights/Allnsights';
-import Settings from './page/Settings/Settings';
-import DeepAnalysis from './page/DeepAnalysis/DeepAnalysis';
+import AIInsights from './Pages/AIInsights/AIInsights';
+import Settings from './Pages/Settings/Settings';
+import DeepAnalysis from './Pages/DeepAnalysis/DeepAnalysis';
 
 import './App.css';
 
