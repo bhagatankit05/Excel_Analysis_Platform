@@ -13,7 +13,7 @@ import {
   Legend,
 } from 'chart.js';
 import { useAuth } from '../../context/AuthContext';
-import { addActivity } from '../../component/RecentActivity/RecentActivity';
+import { addActivity } from '../../components/RecentActivity/RecentActivity';
 import './DeepAnalysis.css';
 
 ChartJS.register(
