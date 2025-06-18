@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import StatsCard from '../../component/StatsCard/StatsCard';
-import RecentActivity from '../../component/RecentActivity/RecentActivity';
-import ReportGenerator from '../../component/ReportGenerator/ReportGenerator';
-import PlotlyChart from '../../component/PlotlyChart/PlotlyChart';
+import StatsCard from '../../Components/StatsCard/StatsCard';
+import RecentActivity from '../../Components/RecentActivity/RecentActivity';
+import ReportGenerator from '../../Components/ReportGenerator/ReportGenerator';
+import PlotlyChart from '../../Components/PlotlyChart/PlotlyChart';
 import * as XLSX from 'xlsx';
 import { Bar, Line, Doughnut, Pie, Radar } from 'react-chartjs-2';
 import {
@@ -20,7 +20,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { addActivity } from '../../component/RecentActivity/RecentActivity';
+import { addActivity } from '../../Components/RecentActivity/RecentActivity';
 import './Dashboard.css';
 
 ChartJS.register(

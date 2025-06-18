@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Bar, Line, Doughnut, Pie, Radar, PolarArea } from 'react-chartjs-2';
-import PlotlyChart from '../../component/PlotlyChart/PlotlyChart';
+import PlotlyChart from '../../Components/PlotlyChart/PlotlyChart';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -15,7 +15,7 @@ import {
   Legend,
 } from 'chart.js';
 import { useAuth } from '../../context/AuthContext';
-import { addActivity } from '../../component/RecentActivity/RecentActivity';
+import { addActivity } from '../../Components/RecentActivity/RecentActivity';
 import './AIInsights.css';
 
 ChartJS.register(

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { addActivity } from '../../component/RecentActivity/RecentActivity';
+import { addActivity } from '../../Components/RecentActivity/RecentActivity';
 import './ActivityLog.css';
 
 const ActivityLog = () => {
