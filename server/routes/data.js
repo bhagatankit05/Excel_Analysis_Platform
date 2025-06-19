@@ -10,16 +10,19 @@ const storage = multer.memoryStorage();
 const upload = multer({
   storage,
   limits: {
-    fileSize: 10 * 1024 * 1024 // 10MB limit
+    fileSize: 10 * 1024 * 1024, // 10MB limit
   },
   fileFilter: (req, file, cb) => {
-    if (file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-        file.mimetype === 'application/vnd.ms-excel') {
+    if (
+      file.mimetype ===
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+      file.mimetype === 'application/vnd.ms-excel'
+    ) {
       cb(null, true);
     } else {
       cb(new Error('Only Excel files are allowed'), false);
     }
-  }
+  },
 });
 
 // Save Excel data
@@ -30,7 +33,7 @@ router.post('/save-excel', auth, async (req, res) => {
     if (!data || !data.labels || !data.values) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid data format'
+        message: 'Invalid data format',
       });
     }
 
@@ -46,7 +49,7 @@ router.post('/save-excel', auth, async (req, res) => {
       average: parseFloat(average.toFixed(2)),
       minimum,
       maximum,
-      count: values.length
+      count: values.length,
     };
 
     // Save to database
@@ -56,7 +59,7 @@ router.post('/save-excel', auth, async (req, res) => {
       originalName: originalName || 'Unknown',
       data,
       chartData,
-      analytics
+      analytics,
     });
 
     await excelData.save();
@@ -64,13 +67,13 @@ router.post('/save-excel', auth, async (req, res) => {
     res.status(201).json({
       success: true,
       message: 'Excel data saved successfully',
-      data: excelData
+      data: excelData,
     });
   } catch (error) {
     console.error('Save Excel data error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to save Excel data'
+      message: 'Failed to save Excel data',
     });
   }
 });
@@ -97,14 +100,14 @@ router.get('/excel-history', auth, async (req, res) => {
         page,
         limit,
         total,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     });
   } catch (error) {
     console.error('Get Excel history error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch Excel data history'
+      message: 'Failed to fetch Excel data history',
     });
   }
 });
@@ -114,25 +117,25 @@ router.get('/excel/:id', auth, async (req, res) => {
   try {
     const excelData = await ExcelData.findOne({
       _id: req.params.id,
-      userId: req.user.userId
+      userId: req.user.userId,
     });
 
     if (!excelData) {
       return res.status(404).json({
         success: false,
-        message: 'Excel data not found'
+        message: 'Excel data not found',
       });
     }
 
     res.json({
       success: true,
-      data: excelData
+      data: excelData,
     });
   } catch (error) {
     console.error('Get Excel data error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch Excel data'
+      message: 'Failed to fetch Excel data',
     });
   }
 });
@@ -140,25 +143,26 @@ router.get('/excel/:id', auth, async (req, res) => {
 // Get latest Excel data for reports
 router.get('/latest-excel', auth, async (req, res) => {
   try {
-    const latestData = await ExcelData.findOne({ userId: req.user.userId })
-      .sort({ uploadedAt: -1 });
+    const latestData = await ExcelData.findOne({
+      userId: req.user.userId,
+    }).sort({ uploadedAt: -1 });
 
     if (!latestData) {
       return res.status(404).json({
         success: false,
-        message: 'No Excel data found'
+        message: 'No Excel data found',
       });
     }
 
     res.json({
       success: true,
-      data: latestData
+      data: latestData,
     });
   } catch (error) {
     console.error('Get latest Excel data error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch latest Excel data'
+      message: 'Failed to fetch latest Excel data',
     });
   }
 });
@@ -168,25 +172,25 @@ router.delete('/excel/:id', auth, async (req, res) => {
   try {
     const excelData = await ExcelData.findOneAndDelete({
       _id: req.params.id,
-      userId: req.user.userId
+      userId: req.user.userId,
     });
 
     if (!excelData) {
       return res.status(404).json({
         success: false,
-        message: 'Excel data not found'
+        message: 'Excel data not found',
       });
     }
 
     res.json({
       success: true,
-      message: 'Excel data deleted successfully'
+      message: 'Excel data deleted successfully',
     });
   } catch (error) {
     console.error('Delete Excel data error:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to delete Excel data'
+      message: 'Failed to delete Excel data',
     });
   }
 });
