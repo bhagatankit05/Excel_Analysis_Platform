@@ -6,7 +6,6 @@ import { auth } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Register endpoint
 router.post(
   '/register',
   [
@@ -15,21 +14,32 @@ router.post(
       .isLength({ min: 3, max: 30 })
       .withMessage('Username must be between 3 and 30 characters')
       .matches(/^[a-zA-Z0-9_]+$/)
-      .withMessage(
-        'Username can only contain letters, numbers, and underscores'
-      ),
+      .withMessage('Username can only contain letters, numbers, and underscores'),
+
+    body('email')
+      .isEmail()
+      .normalizeEmail()
+      .withMessage('Please provide a valid email'),
+
     body('password')
       .isLength({ min: 6 })
       .withMessage('Password must be at least 6 characters long'),
+
     body('confirmPassword').custom((value, { req }) => {
       if (value !== req.body.password) {
         throw new Error('Passwords do not match');
       }
       return true;
     }),
+
+    body('role')
+      .optional()
+      .isIn(['user', 'admin'])
+      .withMessage('Role must be either user or admin'),
   ],
   async (req, res) => {
     try {
+      // Validation Result
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({
@@ -39,41 +49,43 @@ router.post(
         });
       }
 
-      const { username, password } = req.body;
+      const { username, email, password, role = 'user' } = req.body;
 
-      // Check if user already exists
-      const existingUser = await User.findOne({ username });
+      // Check for existing user
+      const existingUser = await User.findOne({ $or: [{ username }, { email }] });
       if (existingUser) {
         return res.status(400).json({
           success: false,
-          message: 'Username already exists',
+          message: 'Username or email already exists',
         });
       }
 
-      // Create new user
-      const user = new User({ username, password });
-      await user.save();
+      // Save new user
+      const newUser = new User({ username, email, password, role });
+      await newUser.save();
 
-      // Generate JWT token
+      // Create token
       const token = jwt.sign(
-        { userId: user._id, username: user.username },
+        { userId: newUser._id, role: newUser.role },
         process.env.JWT_SECRET,
         { expiresIn: '7d' }
       );
 
-      res.status(201).json({
+      return res.status(201).json({
         success: true,
         message: 'User registered successfully',
         token,
         user: {
-          id: user._id,
-          username: user.username,
-          createdAt: user.createdAt,
+          id: newUser._id,
+          username: newUser.username,
+          email: newUser.email,
+          role: newUser.role,
+          createdAt: newUser.createdAt,
         },
       });
     } catch (error) {
-      console.error('Registration error:', error);
-      res.status(500).json({
+      console.error('Registration error:', error.message);
+      return res.status(500).json({
         success: false,
         message: 'Internal server error',
       });
