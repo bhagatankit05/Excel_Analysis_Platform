@@ -2,8 +2,8 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import authRoutes from './routes/auth.js';
-import dataRoutes from './routes/data.js';
+import authRoutes from './routes/auth.routes.js';
+import dataRoutes from './routes/data.routes.js';
 import { errorHandler } from './middleware/errorHandler.middleware.js';
 import { connectDB } from './utils/database.js';
 
