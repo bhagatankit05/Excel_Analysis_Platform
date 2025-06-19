@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { addActivity } from '../../Components/RecentActivity/RecentActivity';
+import { addActivity } from '../../components/RecentActivity/RecentActivity';
 import './ActivityLog.css';
 
 const ActivityLog = () => {
@@ -203,7 +203,7 @@ const ActivityLog = () => {
 
   const handleDeleteActivity = (activityId, event) => {
     event.stopPropagation();
-    setOpenDropdown(null);s
+    setOpenDropdown(null);
     
     if (confirm('Are you sure you want to delete this activity?')) {
       const allActivities = JSON.parse(localStorage.getItem('userActivities')) || [];
