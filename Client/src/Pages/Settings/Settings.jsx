@@ -166,6 +166,7 @@ const Settings = () => {
           alert('Settings imported successfully!');
         } catch (error) {
           alert('Error importing settings. Please check the file format.');
+          console.log(error)
         }
       };
       reader.readAsText(file);

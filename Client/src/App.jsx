@@ -1,6 +1,7 @@
-import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+
+
 
 import Layout from './Components/Layout/Layout';
 
@@ -25,98 +26,106 @@ import ActivityLog from './Pages/ActivityLog/ActivityLog';
 
 import './App.css';
 
+function AppContent() {
+  const { user } = useAuth();
+
+  return (
+    <Router>
+      <Layout>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={user ? <Dashboard /> : <Welcome />} />
+          <Route path="/register/:role" element={<Register />} />
+          <Route path="/login/:role" element={<Login1 />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+
+          {/* Protected Routes */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/upload"
+            element={
+              <ProtectedRoute>
+                <UploadExcel />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reports"
+            element={
+              <ProtectedRoute>
+                <Report />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ai-insights"
+            element={
+              <ProtectedRoute>
+                <AIInsights />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/analyze"
+            element={
+              <ProtectedRoute>
+                <DeepAnalysis />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/activity-log"
+            element={
+              <ProtectedRoute>
+                <ActivityLog />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/contact"
+            element={
+              <ProtectedRoute>
+                <Contact />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/about"
+            element={
+              <ProtectedRoute>
+                <About />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Redirect old routes */}
+          <Route path="/login" element={<Navigate to="/" replace />} />
+          <Route path="/register" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Layout>
+    </Router>
+  );
+}
+
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Layout>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Welcome />} />
-            <Route path="/register/:role" element={<Register />} />
-            <Route path="/login/:role" element={<Login1 />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-
-            {/* Protected Routes */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/upload"
-              element={
-                <ProtectedRoute>
-                  <UploadExcel />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/reports"
-              element={
-                <ProtectedRoute>
-                  <Report />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/ai-insights"
-              element={
-                <ProtectedRoute>
-                  <AIInsights />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/analyze"
-              element={
-                <ProtectedRoute>
-                  <DeepAnalysis />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/activity-log"
-              element={
-                <ProtectedRoute>
-                  <ActivityLog />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <ProtectedRoute>
-                  <Settings />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/contact"
-              element={
-                <ProtectedRoute>
-                  <Contact />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/about"
-              element={
-                <ProtectedRoute>
-                  <About />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Redirect old routes */}
-            <Route path="/login" element={<Navigate to="/" replace />} />
-            <Route path="/register" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Layout>
-      </Router>
+      <AppContent />
     </AuthProvider>
   );
 }
