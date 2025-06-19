@@ -4,7 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.js';
 import dataRoutes from './routes/data.js';
-import { errorHandler } from './middleware/errorHandler.js';
+import { errorHandler } from './middleware/errorHandler.middleware.js';
 import { connectDB } from './utils/database.js';
 
 dotenv.config();

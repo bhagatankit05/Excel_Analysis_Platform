@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { auth } from '../middleware/auth.js';
+import { auth } from '../middleware/auth.middleware.js';
 import ExcelData from '../models/ExcelData.js';
 
 const router = express.Router();

@@ -1,7 +1,7 @@
 // routes/auth.routes.js
 import express from 'express';
-import { validate } from '../middleware/validate.js';
-import { auth } from '../middleware/auth.js';
+import { validate } from '../middleware/Validate.middleware.js';
+import { auth } from '../middleware/auth.middleware.js';
 import { loginUser, getProfile, verifyToken } from '../controllers/auth.controller.js';
 import { loginSchema } from '../schemas/user.schema.js';
 
