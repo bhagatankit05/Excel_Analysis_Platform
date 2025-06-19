@@ -225,7 +225,7 @@ const ForgotPassword = () => {
 
         {step === 2 && (
           <form onSubmit={handleSecurityVerify} className="forgot-form">
-            <div className="user-info">
+            <div className="user-info-forgotPassword">
               <div className="user-avatar">
                 {userFound?.username?.charAt(0).toUpperCase()}
               </div>
