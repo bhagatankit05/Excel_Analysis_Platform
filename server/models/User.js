@@ -10,6 +10,18 @@ const userSchema = new mongoose.Schema({
     minlength: [3, 'Username must be at least 3 characters long'],
     maxlength: [30, 'Username cannot exceed 30 characters']
   },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true
+  },
+  role: {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user',
+    required: true
+  },
   password: {
     type: String,
     required: [true, 'Password is required'],

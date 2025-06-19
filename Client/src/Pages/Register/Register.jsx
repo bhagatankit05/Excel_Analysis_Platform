@@ -149,6 +149,7 @@ const handleSubmit = async e => {
       username,
       email,
       password,
+      confirmPassword,
       role,
     };
 
