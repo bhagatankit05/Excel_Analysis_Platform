@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import './Register.css';
+import { useAuth } from '../../context/AuthContext';
 
 const Register = () => {
+    const { register } = useAuth();
   const navigate = useNavigate();
   const { role } = useParams();
   const [formData, setFormData] = useState({
@@ -99,75 +101,75 @@ const Register = () => {
     return 'Strong';
   };
 
-  const handleSubmit = async e => {
-    e.preventDefault();
-    const { username, email, password, confirmPassword } = formData;
+const handleSubmit = async e => {
+  e.preventDefault();
+  const { username, email, password, confirmPassword } = formData;
 
-    if (!username || !email || !password || !confirmPassword) {
-      setError('All fields are required.');
-      return;
-    }
+  console.log(username);
+  console.log(email);
+  console.log(password);
+  console.log(confirmPassword);
 
-    // Validate username
-    const usernameError = validateUsername(username);
-    if (usernameError) {
-      setError(usernameError);
-      return;
-    }
+  if (!username || !email || !password || !confirmPassword) {
+    setError('All fields are required.');
+    return;
+  }
 
-    // Validate email
-    const emailError = validateEmail(email);
-    if (emailError) {
-      setError(emailError);
-      return;
-    }
+  // Validate username
+  const usernameError = validateUsername(username);
+  if (usernameError) {
+    setError(usernameError);
+    return;
+  }
 
-    // Validate password
-    const passwordValidation = validatePassword(password);
-    if (!passwordValidation.isValid) {
-      setError(`Password requirements: ${passwordValidation.errors.join(', ')}`);
-      return;
-    }
-    
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
+  // Validate email
+  const emailError = validateEmail(email);
+  if (emailError) {
+    setError(emailError);
+    return;
+  }
 
-    setLoading(true);
-    setError('');
+  // Validate password
+  const passwordValidation = validatePassword(password);
+  if (!passwordValidation.isValid) {
+    setError(`Password requirements: ${passwordValidation.errors.join(', ')}`);
+    return;
+  }
 
-    try {
-      let users = JSON.parse(localStorage.getItem('users')) || [];
-      
-      if (users.find(u => u.username === username)) {
-        setError('Username already exists.');
-        return;
-      }
-      
-      if (users.find(u => u.email === email)) {
-        setError('Email already exists.');
-        return;
-      }
+  if (password !== confirmPassword) {
+    setError('Passwords do not match.');
+    return;
+  }
 
-      users.push({ 
-        username, 
-        email, 
-        password, 
-        role,
-        createdAt: new Date().toISOString()
-      });
-      
-      localStorage.setItem('users', JSON.stringify(users));
-      
+  setLoading(true);
+  setError('');
+
+  try {
+    const userData = {
+      username,
+      email,
+      password,
+      role,
+    };
+
+    const res = await register(userData);
+
+    // Assuming register() returns a response with `success` or `status` or `data`
+    if (res?.success || res?.status === 200 || res?.data) {
       alert('Registration successful! Please login.');
       navigate(`/login/${role}`);
-    } catch (error) {
-      setError('Registration failed. Please try again.');
-    } finally {
-      setLoading(false);
+    } else {
+      throw new Error('Registration failed.');
     }
-  };
+
+  } catch (error) {
+    setError('Registration failed. Please try again.');
+    console.error(error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="auth-page">

@@ -17,9 +17,6 @@ const Login1 = () => {
 
   const validatePassword = (password) => {
     const minLength = 6; // Reduced from 8 for easier testing
-    const hasUpperCase = /[A-Z]/.test(password);
-    const hasLowerCase = /[a-z]/.test(password);
-    const hasNumbers = /\d/.test(password);
 
     if (password.length < minLength) {
       return 'Password must be at least 6 characters long';
@@ -82,6 +79,7 @@ const Login1 = () => {
       }
     } catch (err) {
       setError('Login failed. Please try again.');
+      console.log(err.message)
     } finally {
       setLoading(false);
     }
