@@ -1,11 +1,22 @@
 import Activity from '../models/ActivityLogs.models.js';
 
+import { z } from 'zod';
+const querySchema = z.object({
+  userId: z.string().min(1, 'userId is required'),
+});
 
 export const getActivities = async (req, res) => {
   try {
+    const parsed = querySchema.safeParse(req.query);
+    if (!parsed.success) {
+      return res.status(400).json({
+        success: false,
+        message: parsed.error.format(),
+      });
+    }
     const { userId } = req.query;
 
-    // ✅ Validate presence of userId
+    //Validate presence of userId
     if (!userId || typeof userId !== 'string') {
       return res.status(403).json({
         success: false,
@@ -13,16 +24,15 @@ export const getActivities = async (req, res) => {
       });
     }
 
-    // ✅ Fetch only that user's activities, sorted by latest first
+    // Fetch only that user's activities, sorted by latest first
     const activities = await Activity.find({ userId }).sort({ timestamp: -1 });
 
-    // ✅ Send structured response
+    // Send structured response
     res.status(200).json({
       success: true,
       data: activities,
       total: activities.length,
     });
-
   } catch (error) {
     console.error('Get Activities Error:', error);
     res.status(500).json({
