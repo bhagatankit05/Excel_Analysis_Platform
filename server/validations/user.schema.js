@@ -28,3 +28,13 @@ export const loginSchema = z.object({
   username: z.string().min(1, 'Username is required'),
   password: z.string().min(1, 'Password is required'),
 });
+
+
+export const activitySchema = z.object({
+  id: z.number(),
+  type: z.enum(['ai_insight', 'login', 'logout', 'update', 'delete']), // Extend if needed
+  description: z.string().min(1, 'Description is required'),
+  details: z.string().optional(),
+  userId: z.string().min(1, 'User ID is required'),
+  timestamp: z.string().datetime(), // ISO string like "2025-06-21T11:33:09.938Z"
+});
