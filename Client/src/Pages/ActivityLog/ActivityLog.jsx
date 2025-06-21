@@ -62,16 +62,33 @@ const ActivityLog = () => {
     };
   }, []);
 
-  const loadActivities = () => {
-    const storedActivities = JSON.parse(localStorage.getItem('userActivities')) || [];
-    
-    // Filter activities based on user role
-    const userActivities = isAdmin 
-      ? storedActivities 
-      : storedActivities.filter(activity => activity.userId === user?.username);
-    
-    setActivities(userActivities);
-  };
+  const loadActivities = async () => {
+  try {
+    let url = '';
+
+    if (isAdmin) {
+      url = `/api/activities?isAdmin=true`; // 🔐 ideally check admin from token, not query
+    } else if (user?.username) {
+      url = `/api/activities?userId=${user.username}`;
+    } else {
+      console.warn('User info missing.');
+      return;
+    }
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch activities');
+    }
+
+    setActivities(data.data || data); // `data.data` if using wrapped response
+  } catch (error) {
+    console.error('Error fetching activities:', error.message);
+  }
+};
+
+
 
   const filterAndSortActivities = () => {
     let filtered = [...activities];

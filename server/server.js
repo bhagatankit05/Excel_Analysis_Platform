@@ -27,7 +27,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/data', dataRoutes);
-app.use('/api/activity', activityRoutes);
+app.use('/api/activities', activityRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

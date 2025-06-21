@@ -9,7 +9,7 @@ const RecentActivity = () => {
 
   useEffect(() => {
     loadActivities();
-    
+
     // Listen for activity updates
     const handleActivityUpdate = () => {
       loadActivities();
@@ -19,25 +19,89 @@ const RecentActivity = () => {
     return () => window.removeEventListener('activityUpdate', handleActivityUpdate);
   }, [isAdmin]);
 
-  const loadActivities = () => {
-    setLoading(true);
-    
-    // Get activities from localStorage
-    const storedActivities = JSON.parse(localStorage.getItem('userActivities')) || [];
-    
-    // Filter activities based on user role
-    const filteredActivities = isAdmin 
-      ? storedActivities 
-      : storedActivities.filter(activity => activity.userId === user?.username);
-    
-    // Sort by timestamp (newest first)
-    const sortedActivities = filteredActivities
-      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-      .slice(0, 15); // Show only last 15 activities
-    
-    setActivities(sortedActivities);
-    setLoading(false);
+  const loadActivities = async () => {
+    try {
+      setLoading(true);
+
+      let url = '';
+
+      if (isAdmin) {
+        url = `/api/activities?isAdmin=true`; // fetch all (admin)
+      } else if (user?.username) {
+        url = `/api/activities?userId=${user.username}`; // fetch user-specific
+      } else {
+        console.warn('User not logged in');
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to fetch activities');
+      }
+
+      // If backend returns wrapped object: { success, data, total }
+      const allActivities = data.data || data;
+
+      // Sort (newest first) and slice top 15
+      const sortedActivities = allActivities
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+        .slice(0, 15);
+
+      setActivities(sortedActivities);
+    } catch (err) {
+      console.error('Error loading activities:', err.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    const loadActivities = async () => {
+      try {
+        setLoading(true);
+
+        let url = '';
+
+        if (isAdmin) {
+          url = `/api/activities?isAdmin=true`; // fetch all (admin)
+        } else if (user?.username) {
+          url = `/api/activities?userId=${user.username}`; // fetch user-specific
+        } else {
+          console.warn('User not logged in');
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || 'Failed to fetch activities');
+        }
+
+        // If backend returns wrapped object: { success, data, total }
+        const allActivities = data.data || data;
+
+        // Sort (newest first) and slice top 15
+        const sortedActivities = allActivities
+          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+          .slice(0, 15);
+
+        setActivities(sortedActivities);
+      } catch (err) {
+        console.error('Error loading activities:', err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (user) {
+      loadActivities();
+    }
+  }, [user, isAdmin]);
+
 
   const getActivityIcon = (type) => {
     const icons = {
@@ -83,7 +147,7 @@ const RecentActivity = () => {
     const now = new Date();
     const time = new Date(timestamp);
     const diffInSeconds = Math.floor((now - time) / 1000);
-    
+
     if (diffInSeconds < 60) return 'Just now';
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
@@ -117,7 +181,7 @@ const RecentActivity = () => {
     link.download = `activity-log-${user?.username}-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
-    
+
     addActivity('export', 'Exported activity log', 'Downloaded as JSON file');
   };
 
@@ -153,7 +217,7 @@ const RecentActivity = () => {
           )}
         </div>
       </div>
-      
+
       <div className="activity-list">
         {activities.length === 0 ? (
           <div className="no-activities">
@@ -164,11 +228,11 @@ const RecentActivity = () => {
         ) : (
           activities.map((activity) => (
             <div key={activity.id} className="activity-item">
-              <div 
+              <div
                 className="activity-icon"
-                style={{ 
-                  backgroundColor: `${getActivityColor(activity.type)}20`, 
-                  color: getActivityColor(activity.type) 
+                style={{
+                  backgroundColor: `${getActivityColor(activity.type)}20`,
+                  color: getActivityColor(activity.type)
                 }}
               >
                 {getActivityIcon(activity.type)}
@@ -192,7 +256,7 @@ const RecentActivity = () => {
           ))
         )}
       </div>
-      
+
       <div className="activity-footer">
         <button className="refresh-btn" onClick={refreshActivities}>
           <span>🔄</span>
@@ -203,32 +267,42 @@ const RecentActivity = () => {
   );
 };
 
-// Enhanced helper function to add activity
-export const addActivity = (type, description, details = null) => {
-  const user = JSON.parse(localStorage.getItem('token'));
-  if (!user) return;
+// Enhanced helper function to send activity to backend
+export const addActivity = async (type, description, details = null) => {
+  try {
+    const token = JSON.parse(localStorage.getItem('token'));
+    if (!token || !token.username) return;
 
-  const activity = {
-    id: Date.now() + Math.random(),
-    type,
-    description,
-    details,
-    userId: user.username,
-    timestamp: new Date().toISOString()
-  };
+    const activity = {
+      id: Date.now() + Math.random(),         // frontend-generated ID
+      type,
+      description,
+      details,
+      userId: token.username,
+      timestamp: new Date().toISOString(),
+    };
 
-  const activities = JSON.parse(localStorage.getItem('userActivities')) || [];
-  activities.push(activity);
-  
-  // Keep only last 100 activities to prevent storage bloat
-  if (activities.length > 100) {
-    activities.splice(0, activities.length - 100);
+    const res = await fetch('/api/activities', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // 🔐 Optional: Add JWT auth header if you’re securing routes
+        // 'Authorization': `Bearer ${token.accessToken}`
+      },
+      body: JSON.stringify(activity),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Failed to add activity');
+    }
+
+    // ✅ Optional: Notify app to reload logs from server
+    window.dispatchEvent(new CustomEvent('activityUpdate'));
+  } catch (err) {
+    console.error('Failed to add activity:', err.message);
   }
-  
-  localStorage.setItem('userActivities', JSON.stringify(activities));
-  
-  // Dispatch custom event to update UI
-  window.dispatchEvent(new CustomEvent('activityUpdate'));
 };
 
 export default RecentActivity;
