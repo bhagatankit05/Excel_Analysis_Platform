@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes.js';
 import dataRoutes from './routes/data.routes.js';
+import activityRoutes from './routes/activity.routes.js';
 import { errorHandler } from './middleware/errorHandler.middleware.js';
 import { connectDB } from './utils/database.js';
 
@@ -26,6 +27,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/data', dataRoutes);
+app.use('/api/activity', activityRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

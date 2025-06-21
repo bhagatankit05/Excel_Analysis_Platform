@@ -1,5 +1,9 @@
 import express from 'express';
-import { getActivities, addActivity, deleteActivities } from '../Controllers/Activity.controller.js';
+import {
+  getActivities,
+  addActivity,
+  deleteActivities,
+} from '../Controllers/Activity.controller.js';
 import { auth } from '../middleware/auth.middleware.js';
 
 const router = express.Router();
