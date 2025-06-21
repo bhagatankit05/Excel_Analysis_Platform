@@ -1,4 +1,4 @@
-import Activity from '../models/ActivityLogs.models';
+import Activity from '../models/ActivityLogs.models.js'
 
 // GET: All or user-specific activities
 export const getActivities = async (req, res) => {

@@ -4,7 +4,7 @@ import {
   addActivity,
   deleteActivities,
 } from '../Controllers/Activity.controller.js';
-import { auth } from '../middleware/auth.middleware.js';
+import { auth } from '../middleware/Auth.middleware.js';
 
 const router = express.Router();
 
