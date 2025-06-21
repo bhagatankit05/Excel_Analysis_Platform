@@ -13,17 +13,20 @@ export const getActivities = async (req, res) => {
   }
 };
 
-// POST: Add a new activity
+// POST: Add a new activity (with custom 'id' generation)
 export const addActivity = async (req, res) => {
   try {
-    const { type, description, details, userId, timestamp } = req.body;
+    const { type, description, details, userId, timestamp ,id } = req.body;
+
     const activity = new Activity({
+      id,
       type,
       description,
       details,
       userId,
-      timestamp,
+      timestamp: timestamp || new Date().toISOString(), // fallback to current time
     });
+
     await activity.save();
     res.status(201).json({ message: 'Activity logged' });
   } catch (error) {
