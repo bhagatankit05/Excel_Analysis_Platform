@@ -122,33 +122,17 @@ const RecentActivity = () => {
     if (!confirmClear) return;
 
     try {
-      let url = '/api/activities';
-      let method = 'DELETE';
-      let body = {};
+      // 👤 For normal users → pass username
+      // 🔐 For admin → send nothing
+      const userId = !isAdmin && user?.username ? user.username : null;
 
-      if (!isAdmin && user?.username) {
-        body.userId = user.username; // send userId to clear only user's activities
-      }
-
-      const res = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: isAdmin ? null : JSON.stringify(body), // admin sends no body
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || 'Failed to clear activities');
-      }
+      await apiClient.clearActivities(userId);
 
       setActivities([]);
-      alert('Activities cleared successfully ✅');
+      alert('✅ Activities cleared successfully');
     } catch (error) {
-      console.error('Clear Activities Error:', error.message);
-      alert('❌ Failed to clear activities');
+      console.error('❌ Clear Activities Error:', error.message);
+      alert('Failed to clear activities');
     }
   };
 
