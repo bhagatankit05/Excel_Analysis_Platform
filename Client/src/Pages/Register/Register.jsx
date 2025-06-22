@@ -160,11 +160,11 @@ const handleSubmit = async e => {
       alert('Registration successful! Please login.');
       navigate(`/login/${role}`);
     } else {
-      throw new Error('Registration failed.');
+      throw new Error(res.message);
     }
 
   } catch (error) {
-    setError('Registration failed. Please try again.');
+    setError(`${error.message}`);
     console.error(error);
   } finally {
     setLoading(false);
