@@ -96,6 +96,14 @@ class ApiClient {
     });
   }
 
+  // Activity logging endpoint
+async addActivity(activityData) {
+  return this.request('/activities', {
+    method: 'POST',
+    body: JSON.stringify(activityData),
+  });
+}
+
   // Health check
   async checkHealth() {
     return this.request('/health');

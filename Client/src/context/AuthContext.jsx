@@ -18,45 +18,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     initializeAuth();
-    createDemoUsers();
   }, []);
-
-  const createDemoUsers = () => {
-    const existingUsers = JSON.parse(localStorage.getItem('users')) || [];
-    
-    const demoUsers = [
-      {
-        id: 1,
-        username: 'admin',
-        email: 'admin@dataflow.com',
-        password: 'admin123',
-        role: 'admin',
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: 2,
-        username: 'user',
-        email: 'user@dataflow.com',
-        password: 'user123',
-        role: 'user',
-        createdAt: new Date().toISOString()
-      }
-    ];
-    
-    // Always ensure demo users exist with correct data
-    demoUsers.forEach(demoUser => {
-      const existingIndex = existingUsers.findIndex(u => u.username === demoUser.username);
-      if (existingIndex >= 0) {
-        // Update existing user to ensure correct role and password
-        existingUsers[existingIndex] = { ...existingUsers[existingIndex], ...demoUser };
-      } else {
-        existingUsers.push(demoUser);
-      }
-    });
-    
-    localStorage.setItem('users', JSON.stringify(existingUsers));
-    console.log('Demo users created/updated:', demoUsers);
-  };
 
   const initializeAuth = async () => {
     try {

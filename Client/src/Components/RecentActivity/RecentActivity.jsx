@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import './RecentActivity.css';
+import apiClient from '../../utils/api';
 
 const RecentActivity = () => {
   const { user, isAdmin } = useAuth();
@@ -250,39 +251,28 @@ const RecentActivity = () => {
 // Enhanced helper function to send activity to backend
 export const addActivity = async (type, description, details = null) => {
   try {
-    const token = JSON.parse(localStorage.getItem('token'));
-    if (!token || !token.username || !token.token) return;
+    const tokenData = localStorage.getItem('token');
+    if (!tokenData) return;
+
+    const user = JSON.parse(tokenData);
+    if (!user?.username) return;
 
     const activity = {
-      id: Date.now() + Math.random(), // frontend-generated ID
+      id: Date.now() + Math.random(), // optional if backend assigns its own ID
       type,
       description,
       details,
-      userId: token.username,
+      userId: user.username,
       timestamp: new Date().toISOString(),
     };
 
-    const res = await fetch('/api/activities', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token.token}` // ✅ JWT token added here
-      },
-      body: JSON.stringify(activity),
-    });
+    await apiClient.addActivity(activity);
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.message || 'Failed to add activity');
-    }
-
-    // Optional: Trigger activity update listener
+    // Dispatch custom event to refresh logs
     window.dispatchEvent(new CustomEvent('activityUpdate'));
   } catch (err) {
-    console.error('Failed to add activity:', err.message);
+    console.error('❌ Failed to log activity:', err.message);
   }
 };
-
 
 export default RecentActivity;
