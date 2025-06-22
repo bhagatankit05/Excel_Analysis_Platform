@@ -6,7 +6,7 @@ const RecentActivity = () => {
   const { user, isAdmin } = useAuth();
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(false);
-  
+
   const loadActivities = async () => {
     try {
       setLoading(true);
@@ -58,51 +58,6 @@ const RecentActivity = () => {
     return () => window.removeEventListener('activityUpdate', handleActivityUpdate);
   }, [isAdmin]);
 
-
-
-  // useEffect(() => {
-  //   const loadActivities = async () => {
-  //     try {
-  //       setLoading(true);
-
-  //       let url = '';
-
-  //       if (isAdmin) {
-  //         url = `/api/activities?isAdmin=true`; // fetch all (admin)
-  //       } else if (user?.username) {
-  //         url = `/api/activities?userId=${user.username}`; // fetch user-specific
-  //       } else {
-  //         console.warn('User not logged in');
-  //         setLoading(false);
-  //         return;
-  //       }
-
-  //       const response = await fetch(url);
-  //       const data = await response.json();
-
-  //       if (!response.ok) {
-  //         throw new Error(data.message || 'Failed to fetch activities');
-  //       }
-
-  //       // If backend returns wrapped object: { success, data, total }
-  //       const allActivities = data.data || data;
-
-  //       // Sort (newest first) and slice top 15
-  //       const sortedActivities = allActivities
-  //         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-  //         .slice(0, 15);
-
-  //       setActivities(sortedActivities);
-  //     } catch (err) {
-  //       console.error('Error loading activities:', err.message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  //   if (user) {
-  //     loadActivities();
-  //   }
-  // }, [user, isAdmin]);
 
 
   const getActivityIcon = (type) => {
@@ -161,18 +116,41 @@ const RecentActivity = () => {
     loadActivities();
   };
 
-  const clearActivities = () => {
-    if (confirm('Are you sure you want to clear all activities?')) {
-      if (isAdmin) {
-        localStorage.removeItem('userActivities');
-      } else {
-        const allActivities = JSON.parse(localStorage.getItem('userActivities')) || [];
-        const otherUserActivities = allActivities.filter(activity => activity.userId !== user?.username);
-        localStorage.setItem('userActivities', JSON.stringify(otherUserActivities));
+  const clearActivities = async () => {
+    const confirmClear = window.confirm('Are you sure you want to clear all activities?');
+    if (!confirmClear) return;
+
+    try {
+      let url = '/api/activities';
+      let method = 'DELETE';
+      let body = {};
+
+      if (!isAdmin && user?.username) {
+        body.userId = user.username; // send userId to clear only user's activities
       }
+
+      const res = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: isAdmin ? null : JSON.stringify(body), // admin sends no body
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to clear activities');
+      }
+
       setActivities([]);
+      alert('Activities cleared successfully ✅');
+    } catch (error) {
+      console.error('Clear Activities Error:', error.message);
+      alert('❌ Failed to clear activities');
     }
   };
+
 
   const exportActivities = () => {
     const dataStr = JSON.stringify(activities, null, 2);
