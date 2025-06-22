@@ -4,7 +4,7 @@ import './Register.css';
 import { useAuth } from '../../context/AuthContext';
 
 const Register = () => {
-    const { register } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
   const { role } = useParams();
   const [formData, setFormData] = useState({
@@ -75,7 +75,7 @@ const Register = () => {
   const handleChange = e => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    
+
     // Clear error when user starts typing
     if (error) setError('');
 
@@ -101,75 +101,75 @@ const Register = () => {
     return 'Strong';
   };
 
-const handleSubmit = async e => {
-  e.preventDefault();
-  const { username, email, password, confirmPassword } = formData;
+  const handleSubmit = async e => {
+    e.preventDefault();
+    const { username, email, password, confirmPassword } = formData;
 
-  console.log(username);
-  console.log(email);
-  console.log(password);
-  console.log(confirmPassword);
+    console.log(username);
+    console.log(email);
+    console.log(password);
+    console.log(confirmPassword);
 
-  if (!username || !email || !password || !confirmPassword) {
-    setError('All fields are required.');
-    return;
-  }
-
-  // Validate username
-  const usernameError = validateUsername(username);
-  if (usernameError) {
-    setError(usernameError);
-    return;
-  }
-
-  // Validate email
-  const emailError = validateEmail(email);
-  if (emailError) {
-    setError(emailError);
-    return;
-  }
-
-  // Validate password
-  const passwordValidation = validatePassword(password);
-  if (!passwordValidation.isValid) {
-    setError(`Password requirements: ${passwordValidation.errors.join(', ')}`);
-    return;
-  }
-
-  if (password !== confirmPassword) {
-    setError('Passwords do not match.');
-    return;
-  }
-
-  setLoading(true);
-  setError('');
-
-  try {
-    const userData = {
-      username,
-      email,
-      password,
-      confirmPassword,
-      role,
-    };
-
-    const res = await register(userData);
-
-    // Assuming register() returns a response with `success` or `status` or `data`
-    if (res?.success || res?.status === 200 || res?.data) {
-      alert('Registration successful! Please login.');
-      navigate(`/login/${role}`);
-    } else {
-      throw new Error(res.message);
+    if (!username || !email || !password || !confirmPassword) {
+      setError('All fields are required.');
+      return;
     }
 
-  } catch (error) {
-    setError(`${error.message}`);
-    console.error(error);
-  } finally {
-    setLoading(false);
-  }
-};
+    // Validate username
+    const usernameError = validateUsername(username);
+    if (usernameError) {
+      setError(usernameError);
+      return;
+    }
+
+    // Validate email
+    const emailError = validateEmail(email);
+    if (emailError) {
+      setError(emailError);
+      return;
+    }
+
+    // Validate password
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      setError(`Password requirements: ${passwordValidation.errors.join(', ')}`);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const userData = {
+        username,
+        email,
+        password,
+        confirmPassword,
+        role,
+      };
+
+      const res = await register(userData);
+
+      // Assuming register() returns a response with `success` or `status` or `data`
+      if (res?.success || res?.status === 200 || res?.data) {
+        alert('Registration successful! Please login.');
+        navigate(`/login/${role}`);
+      } else {
+        throw new Error(res.message);
+      }
+
+    } catch (error) {
+      setError(`${error.message}`);
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   return (
@@ -180,9 +180,9 @@ const handleSubmit = async e => {
           <p>Join as a {role}</p>
           <div className="role-badge">{role}</div>
         </div>
-        
+
         {error && <div className="error-message">{error}</div>}
-        
+
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
             <label>Username</label>
@@ -200,7 +200,7 @@ const handleSubmit = async e => {
             </div>
             <small className="input-hint">3-20 characters, letters, numbers, and underscores only</small>
           </div>
-          
+
           <div className="form-group">
             <label>Email</label>
             <div className="input-container">
@@ -217,7 +217,7 @@ const handleSubmit = async e => {
             </div>
             <small className="input-hint">We'll use this for account recovery</small>
           </div>
-          
+
           <div className="form-group">
             <label>Password</label>
             <div className="input-container">
@@ -242,9 +242,9 @@ const handleSubmit = async e => {
             {formData.password && (
               <div className="password-strength">
                 <div className="strength-bar">
-                  <div 
-                    className="strength-fill" 
-                    style={{ 
+                  <div
+                    className="strength-fill"
+                    style={{
                       width: `${(passwordStrength / 5) * 100}%`,
                       backgroundColor: getPasswordStrengthColor()
                     }}
@@ -257,7 +257,7 @@ const handleSubmit = async e => {
             )}
             <small className="input-hint">6+ characters with uppercase, lowercase, and number</small>
           </div>
-          
+
           <div className="form-group">
             <label>Confirm Password</label>
             <div className="input-container">
@@ -283,7 +283,7 @@ const handleSubmit = async e => {
               <small className="error-hint">Passwords do not match</small>
             )}
           </div>
-          
+
           <button type="submit" className="auth-btn" disabled={loading}>
             {loading ? (
               <>
