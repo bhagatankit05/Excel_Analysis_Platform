@@ -251,10 +251,10 @@ const RecentActivity = () => {
 export const addActivity = async (type, description, details = null) => {
   try {
     const token = JSON.parse(localStorage.getItem('token'));
-    if (!token || !token.username) return;
+    if (!token || !token.username || !token.token) return;
 
     const activity = {
-      id: Date.now() + Math.random(),         // frontend-generated ID
+      id: Date.now() + Math.random(), // frontend-generated ID
       type,
       description,
       details,
@@ -266,8 +266,7 @@ export const addActivity = async (type, description, details = null) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // 🔐 Optional: Add JWT auth header if you’re securing routes
-        // 'Authorization': `Bearer ${token.accessToken}`
+        'Authorization': `Bearer ${token.token}` // ✅ JWT token added here
       },
       body: JSON.stringify(activity),
     });
@@ -278,11 +277,12 @@ export const addActivity = async (type, description, details = null) => {
       throw new Error(data.message || 'Failed to add activity');
     }
 
-    // ✅ Optional: Notify app to reload logs from server
+    // Optional: Trigger activity update listener
     window.dispatchEvent(new CustomEvent('activityUpdate'));
   } catch (err) {
     console.error('Failed to add activity:', err.message);
   }
 };
+
 
 export default RecentActivity;
