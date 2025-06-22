@@ -12,7 +12,7 @@ const loadActivities = async () => {
   try {
     setLoading(true);
 
-    if (!user?.username && !isAdmin) {
+    if (!user?.username) {
       console.warn('User not logged in');
       return;
     }
@@ -33,7 +33,6 @@ const loadActivities = async () => {
     setLoading(false);
   }
 };
-
 
   useEffect(() => {
     loadActivities();
