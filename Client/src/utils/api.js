@@ -107,6 +107,8 @@ class ApiClient {
     });
   }
 
+  
+
   async getActivities(params = {}) {
     const query = new URLSearchParams(params).toString();
     return this.request(`/activities?${query}`);

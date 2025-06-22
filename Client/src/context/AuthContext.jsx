@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       console.log('Login attempt:', credentials);
-      
+
       if (backendConnected) {
         // Use backend authentication
         const response = await apiClient.login(credentials);
@@ -71,12 +71,12 @@ export const AuthProvider = ({ children }) => {
         const users = JSON.parse(localStorage.getItem('users')) || [];
         console.log('Available users:', users);
         console.log('Looking for user with credentials:', credentials);
-        
+
         const user = users.find(u => {
           const usernameMatch = u.username === credentials.username;
           const passwordMatch = u.password === credentials.password;
           const roleMatch = u.role === credentials.role;
-          
+
           console.log(`Checking user ${u.username}:`, {
             usernameMatch,
             passwordMatch,
@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }) => {
             userRole: u.role,
             expectedRole: credentials.role
           });
-          
+
           return usernameMatch && passwordMatch && roleMatch;
         });
 
@@ -101,9 +101,9 @@ export const AuthProvider = ({ children }) => {
           return { success: true };
         } else {
           console.log('Login failed: No matching user found');
-          return { 
-            success: false, 
-            message: 'Invalid username, password, or role. Please check your credentials.' 
+          return {
+            success: false,
+            message: 'Invalid username, password, or role. Please check your credentials.'
           };
         }
       }
@@ -116,7 +116,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       console.log('Registration attempt:', userData);
-      
+
       if (backendConnected) {
         // Use backend registration
         const response = await apiClient.register(userData);
@@ -124,11 +124,11 @@ export const AuthProvider = ({ children }) => {
       } else {
         // Fallback to local storage registration
         const users = JSON.parse(localStorage.getItem('users')) || [];
-        
+
         if (users.find(u => u.username === userData.username)) {
           return { success: false, message: 'Username already exists' };
         }
-        
+
         if (users.find(u => u.email === userData.email)) {
           return { success: false, message: 'Email already exists' };
         }
@@ -138,7 +138,7 @@ export const AuthProvider = ({ children }) => {
           ...userData,
           createdAt: new Date().toISOString()
         };
-        
+
         users.push(newUser);
         localStorage.setItem('users', JSON.stringify(users));
         console.log('Registration successful:', newUser);

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { addActivity } from '../../components/RecentActivity/RecentActivity';
+import { addActivity } from '../../Components/RecentActivity/RecentActivity';
 import './ActivityLog.css';
+import apiClient from '../../utils/api';
 
 const ActivityLog = () => {
   const { user, isAdmin } = useAuth();
@@ -40,6 +41,26 @@ const ActivityLog = () => {
     { id: 'month', name: 'This Month' },
     { id: 'quarter', name: 'This Quarter' }
   ];
+  
+  const loadActivities = async () => {
+    try {
+      if (!user?.username) {
+        console.warn('User info missing.');
+        return;
+      }
+
+      const params = isAdmin ? { isAdmin: true } : { userId: user.username };
+
+      const response = await apiClient.getActivities(params);
+
+      // Always expect backend to send { data: [] }
+      const activities = response.data || response;
+
+      setActivities(activities);
+    } catch (error) {
+      console.error('Error fetching activities:', error.message);
+    }
+  };
 
   useEffect(() => {
     loadActivities();
@@ -62,31 +83,7 @@ const ActivityLog = () => {
     };
   }, []);
 
-  const loadActivities = async () => {
-  try {
-    let url = '';
 
-    if (isAdmin) {
-      url = `/api/activities?isAdmin=true`; // 🔐 ideally check admin from token, not query
-    } else if (user?.username) {
-      url = `/api/activities?userId=${user.username}`;
-    } else {
-      console.warn('User info missing.');
-      return;
-    }
-
-    const response = await fetch(url);
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to fetch activities');
-    }
-
-    setActivities(data.data || data); // `data.data` if using wrapped response
-  } catch (error) {
-    console.error('Error fetching activities:', error.message);
-  }
-};
 
 
 
@@ -102,29 +99,29 @@ const ActivityLog = () => {
     if (filterDate !== 'all') {
       const now = new Date();
       const activityDate = new Date();
-      
+
       switch (filterDate) {
         case 'today':
           activityDate.setHours(0, 0, 0, 0);
-          filtered = filtered.filter(activity => 
+          filtered = filtered.filter(activity =>
             new Date(activity.timestamp) >= activityDate
           );
           break;
         case 'week':
           activityDate.setDate(now.getDate() - 7);
-          filtered = filtered.filter(activity => 
+          filtered = filtered.filter(activity =>
             new Date(activity.timestamp) >= activityDate
           );
           break;
         case 'month':
           activityDate.setMonth(now.getMonth() - 1);
-          filtered = filtered.filter(activity => 
+          filtered = filtered.filter(activity =>
             new Date(activity.timestamp) >= activityDate
           );
           break;
         case 'quarter':
           activityDate.setMonth(now.getMonth() - 3);
-          filtered = filtered.filter(activity => 
+          filtered = filtered.filter(activity =>
             new Date(activity.timestamp) >= activityDate
           );
           break;
@@ -144,12 +141,12 @@ const ActivityLog = () => {
     filtered.sort((a, b) => {
       let aValue = a[sortBy];
       let bValue = b[sortBy];
-      
+
       if (sortBy === 'timestamp') {
         aValue = new Date(aValue);
         bValue = new Date(bValue);
       }
-      
+
       if (sortOrder === 'asc') {
         return aValue > bValue ? 1 : -1;
       } else {
@@ -190,7 +187,7 @@ const ActivityLog = () => {
     const now = new Date();
     const time = new Date(timestamp);
     const diffInSeconds = Math.floor((now - time) / 1000);
-    
+
     if (diffInSeconds < 60) return 'Just now';
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
@@ -221,12 +218,12 @@ const ActivityLog = () => {
   const handleDeleteActivity = (activityId, event) => {
     event.stopPropagation();
     setOpenDropdown(null);
-    
+
     if (confirm('Are you sure you want to delete this activity?')) {
       const allActivities = JSON.parse(localStorage.getItem('userActivities')) || [];
       const updatedActivities = allActivities.filter(activity => activity.id !== activityId);
       localStorage.setItem('userActivities', JSON.stringify(updatedActivities));
-      
+
       setActivities(prev => prev.filter(activity => activity.id !== activityId));
       addActivity('system', 'Deleted activity log entry', 'Activity removed from log');
     }
@@ -235,7 +232,7 @@ const ActivityLog = () => {
   const handleExportActivity = (activity, event) => {
     event.stopPropagation();
     setOpenDropdown(null);
-    
+
     const dataStr = JSON.stringify(activity, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
@@ -244,7 +241,7 @@ const ActivityLog = () => {
     link.download = `activity-${activity.id}-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
-    
+
     addActivity('export', 'Exported single activity', 'Downloaded as JSON file');
   };
 
@@ -257,7 +254,7 @@ const ActivityLog = () => {
     link.download = `activity-log-${user?.username}-${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
-    
+
     addActivity('export', 'Exported activity log', 'Downloaded as JSON file');
   };
 
@@ -313,7 +310,7 @@ const ActivityLog = () => {
           <h1>📋 Activity Log</h1>
           <p>Complete history of all system activities and user interactions</p>
         </div>
-        
+
         <div className="header-actions">
           <button className="action-btn secondary" onClick={exportActivities}>
             <span>📤</span>
@@ -371,7 +368,7 @@ const ActivityLog = () => {
             className="search-input"
           />
         </div>
-        
+
         <div className="filter-section">
           <select
             value={filterType}
@@ -384,7 +381,7 @@ const ActivityLog = () => {
               </option>
             ))}
           </select>
-          
+
           <select
             value={filterDate}
             onChange={(e) => setFilterDate(e.target.value)}
@@ -396,7 +393,7 @@ const ActivityLog = () => {
               </option>
             ))}
           </select>
-          
+
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
@@ -407,7 +404,7 @@ const ActivityLog = () => {
             <option value="userId">User</option>
             <option value="description">Description</option>
           </select>
-          
+
           <button
             className="sort-btn"
             onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
@@ -428,21 +425,21 @@ const ActivityLog = () => {
         ) : (
           <div className="activity-list">
             {currentActivities.map((activity) => (
-              <div 
-                key={activity.id} 
+              <div
+                key={activity.id}
                 className="activity-item"
                 onClick={() => handleActivityClick(activity)}
               >
-                <div 
+                <div
                   className="activity-icon"
-                  style={{ 
-                    backgroundColor: `${getActivityColor(activity.type)}20`, 
-                    color: getActivityColor(activity.type) 
+                  style={{
+                    backgroundColor: `${getActivityColor(activity.type)}20`,
+                    color: getActivityColor(activity.type)
                   }}
                 >
                   {getActivityIcon(activity.type)}
                 </div>
-                
+
                 <div className="activity-content">
                   <div className="activity-main">
                     <h4 className="activity-description">{activity.description}</h4>
@@ -454,40 +451,40 @@ const ActivityLog = () => {
                       <span className="activity-type">{activity.type}</span>
                     </div>
                   </div>
-                  
+
                   {activity.details && (
                     <div className="activity-details">
                       {activity.details}
                     </div>
                   )}
                 </div>
-                
+
                 <div className="activity-actions" ref={openDropdown === activity.id ? dropdownRef : null}>
-                  <button 
-                    className="action-menu-btn" 
+                  <button
+                    className="action-menu-btn"
                     onClick={(e) => handleDropdownToggle(activity.id, e)}
                     title="More options"
                   >
                     ⋯
                   </button>
-                  
+
                   {openDropdown === activity.id && (
                     <div className="action-dropdown">
-                      <button 
+                      <button
                         className="dropdown-item"
                         onClick={(e) => handleViewDetails(activity, e)}
                       >
                         <span>👁️</span>
                         View Details
                       </button>
-                      <button 
+                      <button
                         className="dropdown-item"
                         onClick={(e) => handleExportActivity(activity, e)}
                       >
                         <span>📤</span>
                         Export
                       </button>
-                      <button 
+                      <button
                         className="dropdown-item danger"
                         onClick={(e) => handleDeleteActivity(activity.id, e)}
                       >
@@ -501,24 +498,24 @@ const ActivityLog = () => {
             ))}
           </div>
         )}
-        
+
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="pagination">
-            <button 
+            <button
               className="page-btn"
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
             >
               ← Previous
             </button>
-            
+
             <div className="page-info">
               <span>Page {currentPage} of {totalPages}</span>
               <span className="total-items">({filteredActivities.length} activities)</span>
             </div>
-            
-            <button 
+
+            <button
               className="page-btn"
               onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
               disabled={currentPage === totalPages}
@@ -540,45 +537,45 @@ const ActivityLog = () => {
               </h3>
               <button className="close-btn" onClick={() => setShowModal(false)}>✕</button>
             </div>
-            
+
             <div className="modal-content">
               <div className="detail-group">
                 <label>Description:</label>
                 <p>{selectedActivity.description}</p>
               </div>
-              
+
               <div className="detail-group">
                 <label>Type:</label>
                 <span className="type-badge" style={{ backgroundColor: `${getActivityColor(selectedActivity.type)}20`, color: getActivityColor(selectedActivity.type) }}>
                   {getActivityIcon(selectedActivity.type)} {selectedActivity.type}
                 </span>
               </div>
-              
+
               <div className="detail-group">
                 <label>Timestamp:</label>
                 <p>{formatFullDate(selectedActivity.timestamp)}</p>
               </div>
-              
+
               {selectedActivity.userId && (
                 <div className="detail-group">
                   <label>User:</label>
                   <p>{selectedActivity.userId}</p>
                 </div>
               )}
-              
+
               {selectedActivity.details && (
                 <div className="detail-group">
                   <label>Additional Details:</label>
                   <p>{selectedActivity.details}</p>
                 </div>
               )}
-              
+
               <div className="detail-group">
                 <label>Activity ID:</label>
                 <p className="activity-id">{selectedActivity.id}</p>
               </div>
             </div>
-            
+
             <div className="modal-actions">
               <button className="modal-btn secondary" onClick={() => setShowModal(false)}>
                 Close
