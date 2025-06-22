@@ -8,44 +8,32 @@ const RecentActivity = () => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const loadActivities = async () => {
-    try {
-      setLoading(true);
+const loadActivities = async () => {
+  try {
+    setLoading(true);
 
-      let url = '';
-
-      if (isAdmin) {
-        url = `/api/activities?isAdmin=true`; // fetch all (admin)
-      } else if (user?.username) {
-        url = `/api/activities?userId=${user.username}`; // fetch user-specific
-      } else {
-        console.warn('User not logged in');
-        setLoading(false);
-        return;
-      }
-
-      const response = await fetch(url);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to fetch activities');
-      }
-
-      // If backend returns wrapped object: { success, data, total }
-      const allActivities = data.data || data;
-
-      // Sort (newest first) and slice top 15
-      const sortedActivities = allActivities
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-        .slice(0, 15);
-
-      setActivities(sortedActivities);
-    } catch (err) {
-      console.error('Error loading activities:', err.message);
-    } finally {
-      setLoading(false);
+    if (!user?.username && !isAdmin) {
+      console.warn('User not logged in');
+      return;
     }
-  };
+
+    const params = isAdmin ? { isAdmin: true } : { userId: user.username };
+
+    const data = await apiClient.getActivities(params);
+    const activities = data.data || data;
+
+    const sortedActivities = activities
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+      .slice(0, 15);
+
+    setActivities(sortedActivities);
+  } catch (err) {
+    console.error('Error loading activities:', err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     loadActivities();

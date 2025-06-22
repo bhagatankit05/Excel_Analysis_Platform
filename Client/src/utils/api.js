@@ -107,6 +107,11 @@ class ApiClient {
     });
   }
 
+  async getActivities(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    return this.request(`/activities?${query}`);
+  }
+
   async clearActivities(userId = null) {
     return this.request("/activities", {
       method: "DELETE",
