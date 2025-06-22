@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import './RecentActivity.css';
 
@@ -6,19 +6,7 @@ const RecentActivity = () => {
   const { user, isAdmin } = useAuth();
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    loadActivities();
-
-    // Listen for activity updates
-    const handleActivityUpdate = () => {
-      loadActivities();
-    };
-
-    window.addEventListener('activityUpdate', handleActivityUpdate);
-    return () => window.removeEventListener('activityUpdate', handleActivityUpdate);
-  }, [isAdmin]);
-
+  
   const loadActivities = async () => {
     try {
       setLoading(true);
@@ -59,51 +47,65 @@ const RecentActivity = () => {
   };
 
   useEffect(() => {
-    const loadActivities = async () => {
-      try {
-        setLoading(true);
+    loadActivities();
 
-        let url = '';
-
-        if (isAdmin) {
-          url = `/api/activities?isAdmin=true`; // fetch all (admin)
-        } else if (user?.username) {
-          url = `/api/activities?userId=${user.username}`; // fetch user-specific
-        } else {
-          console.warn('User not logged in');
-          setLoading(false);
-          return;
-        }
-
-        const response = await fetch(url);
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || 'Failed to fetch activities');
-        }
-
-        // If backend returns wrapped object: { success, data, total }
-        const allActivities = data.data || data;
-
-        // Sort (newest first) and slice top 15
-        const sortedActivities = allActivities
-          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-          .slice(0, 15);
-
-        setActivities(sortedActivities);
-      } catch (err) {
-        console.error('Error loading activities:', err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (user) {
+    // Listen for activity updates
+    const handleActivityUpdate = () => {
       loadActivities();
-    }
-  }, [user, isAdmin]);
+    };
+
+    window.addEventListener('activityUpdate', handleActivityUpdate);
+    return () => window.removeEventListener('activityUpdate', handleActivityUpdate);
+  }, [isAdmin]);
 
 
-  const getActivityIcon = (type) => { 
+
+  // useEffect(() => {
+  //   const loadActivities = async () => {
+  //     try {
+  //       setLoading(true);
+
+  //       let url = '';
+
+  //       if (isAdmin) {
+  //         url = `/api/activities?isAdmin=true`; // fetch all (admin)
+  //       } else if (user?.username) {
+  //         url = `/api/activities?userId=${user.username}`; // fetch user-specific
+  //       } else {
+  //         console.warn('User not logged in');
+  //         setLoading(false);
+  //         return;
+  //       }
+
+  //       const response = await fetch(url);
+  //       const data = await response.json();
+
+  //       if (!response.ok) {
+  //         throw new Error(data.message || 'Failed to fetch activities');
+  //       }
+
+  //       // If backend returns wrapped object: { success, data, total }
+  //       const allActivities = data.data || data;
+
+  //       // Sort (newest first) and slice top 15
+  //       const sortedActivities = allActivities
+  //         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+  //         .slice(0, 15);
+
+  //       setActivities(sortedActivities);
+  //     } catch (err) {
+  //       console.error('Error loading activities:', err.message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   if (user) {
+  //     loadActivities();
+  //   }
+  // }, [user, isAdmin]);
+
+
+  const getActivityIcon = (type) => {
     const icons = {
       upload: '📤',
       analysis: '🔍',
