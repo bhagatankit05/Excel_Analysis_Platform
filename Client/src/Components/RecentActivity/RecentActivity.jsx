@@ -103,7 +103,7 @@ const RecentActivity = () => {
   }, [user, isAdmin]);
 
 
-  const getActivityIcon = (type) => {
+  const getActivityIcon = (type) => { 
     const icons = {
       upload: '📤',
       analysis: '🔍',
