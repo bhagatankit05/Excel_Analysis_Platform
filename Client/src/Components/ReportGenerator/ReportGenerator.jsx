@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { jsPDF } from 'jspdf';
+import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { addActivity } from '../RecentActivity/RecentActivity';
 import './ReportGenerator.css';
@@ -10,239 +10,164 @@ const ReportGenerator = ({ data, chartRef, insights = [] }) => {
 
   const generatePDFReport = async () => {
     setGenerating(true);
-    
+
     try {
-      const pdf = new jsPDF();
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      
-      // Header
-      pdf.setFontSize(20);
-      pdf.setTextColor(102, 126, 234);
-      pdf.text('DataFlow Analytics Report', 20, 30);
-      
-      pdf.setFontSize(12);
-      pdf.setTextColor(0, 0, 0);
-      pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 45);
-      pdf.text(`Report Type: ${reportType.charAt(0).toUpperCase() + reportType.slice(1)}`, 20, 55);
-      
-      let yPosition = 70;
-      
-      // Data Summary
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4', compress: true });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const margin = 18;
+      const brand = [94, 53, 177];
+      const txt = [32, 33, 36];
+      let y = 34;
+
+      pdf.setDrawColor(230).rect(margin / 2, margin / 2, pageW - margin, pageH - margin, 'S');
+      pdf.setFillColor(...brand).rect(0, 0, pageW, 24, 'F');
+      pdf.setFont(pdf.getFontList()['Inter'] ? 'Inter' : 'helvetica', 'bold');
+      pdf.setFontSize(15).setTextColor(255);
+      pdf.text('DataFlow Analytics Report', margin, 16);
+
+      pdf.setFontSize(11).setFont(undefined, 'normal').setTextColor(...txt);
+      pdf.text(`Date · ${new Date().toLocaleDateString()}`, margin, y); y += 6;
+      pdf.text(`Report Type · ${reportType}`, margin, y); y += 12;
+
       if (data) {
-        pdf.setFontSize(16);
-        pdf.setTextColor(102, 126, 234);
-        pdf.text('Data Summary', 20, yPosition);
-        yPosition += 15;
-        
-        pdf.setFontSize(12);
-        pdf.setTextColor(0, 0, 0);
-        pdf.text(`Total Records: ${data.rowCount || 'N/A'}`, 20, yPosition);
-        yPosition += 10;
-        pdf.text(`Columns: ${data.columnCount || 'N/A'}`, 20, yPosition);
-        yPosition += 10;
-        pdf.text(`File: ${data.fileName || 'N/A'}`, 20, yPosition);
-        yPosition += 20;
+        pdf.setFontSize(13).setFont(undefined, 'bold').setTextColor(...brand);
+        pdf.text('Summary', margin, y); y += 7;
+        pdf.setFontSize(11).setFont(undefined, 'normal').setTextColor(...txt);
+        pdf.text(`• File: ${data.fileName ?? 'N/A'}`, margin, y); y += 6;
+        pdf.text(`• Rows: ${data.rowCount ?? 'N/A'}`, margin, y); y += 6;
+        pdf.text(`• Columns: ${data.columnCount ?? 'N/A'}`, margin, y); y += 10;
       }
-      
-      // Chart
-      if (chartRef && chartRef.current) {
-        try {
-          const canvas = await html2canvas(chartRef.current);
-          const imgData = canvas.toDataURL('image/png');
-          const imgWidth = pageWidth - 40;
-          const imgHeight = (canvas.height * imgWidth) / canvas.width;
-          
-          if (yPosition + imgHeight > pageHeight - 20) {
-            pdf.addPage();
-            yPosition = 20;
-          }
-          
-          pdf.addImage(imgData, 'PNG', 20, yPosition, imgWidth, imgHeight);
-          yPosition += imgHeight + 20;
-        } catch (error) {
-          console.error('Error adding chart to PDF:', error);
-        }
+
+      const chartDataURL = async () => {
+        if (!chartRef?.current) return null;
+        if (chartRef.current.toBase64Image) return chartRef.current.toBase64Image();
+        if (chartRef.current.getDataURL) return chartRef.current.getDataURL({ type: 'png', pixelRatio: 2 });
+        const node = chartRef.current.canvas || chartRef.current.querySelector?.('canvas') || chartRef.current;
+        const c = await html2canvas(node, { scale: 2, useCORS: true });
+        return c.toDataURL('image/png');
+      };
+
+      const imgURL = await chartDataURL();
+      if (imgURL) {
+        const imgW = pageW - margin * 2;
+        const imgH = (imgW * 9) / 16;
+        if (y + imgH > pageH - margin) { pdf.addPage(); pdf.rect(margin / 2, margin / 2, pageW - margin, pageH - margin, 'S'); y = margin + 16; }
+        pdf.setFontSize(13).setFont(undefined, 'bold').setTextColor(...brand);
+        pdf.text('Visualization', margin, y); y += 5;
+        pdf.addImage(imgURL, 'PNG', margin, y, imgW, imgH, '', 'FAST');
+        y += imgH + 12;
       }
-      
-      // Insights
-      if (insights.length > 0) {
-        if (yPosition > pageHeight - 60) {
-          pdf.addPage();
-          yPosition = 20;
-        }
-        
-        pdf.setFontSize(16);
-        pdf.setTextColor(102, 126, 234);
-        pdf.text('AI Insights', 20,Position);
-        yPosition += 15;
-        
-        insights.slice(0, 5).forEach((insight, index) => {
-          if (yPosition > pageHeight - 40) {
-            pdf.addPage();
-            yPosition = 20;
-          }
-          
-          pdf.setFontSize(12);
-          pdf.setTextColor(0, 0, 0);
-          pdf.text(`${index + 1}. ${insight.title}`, 20, yPosition);
-          yPosition += 10;
-          
-          const splitDescription = pdf.splitTextToSize(insight.description, pageWidth - 40);
-          pdf.text(splitDescription, 25, yPosition);
-          yPosition += splitDescription.length * 5 + 10;
+
+      if (insights.length) {
+        if (y > pageH - 40) { pdf.addPage(); pdf.rect(margin / 2, margin / 2, pageW - margin, pageH - margin, 'S'); y = margin + 16; }
+        pdf.setFontSize(13).setFont(undefined, 'bold').setTextColor(...brand);
+        pdf.text('AI Insights', margin, y); y += 7;
+        pdf.setFontSize(11).setFont(undefined, 'normal').setTextColor(...txt);
+
+        insights.slice(0, 5).forEach((ins, idx) => {
+          if (y > pageH - 30) { pdf.addPage(); pdf.rect(margin / 2, margin / 2, pageW - margin, pageH - margin, 'S'); y = margin + 16; }
+          pdf.setFont(undefined, 'bold').text(`${idx + 1}. ${ins.title}`, margin, y); y += 5;
+          pdf.setFont(undefined, 'normal');
+          const wrap = pdf.splitTextToSize(ins.description, pageW - margin * 2);
+          pdf.text(wrap, margin + 4, y); y += wrap.length * 5 + 6;
         });
       }
-      
-      // Footer
-      const totalPages = pdf.internal.getNumberOfPages();
-      for (let i = 1; i <= totalPages; i++) {
-        pdf.setPage(i);
-        pdf.setFontSize(10);
-        pdf.setTextColor(128, 128, 128);
-        pdf.text(`Page ${i} of ${totalPages}`, pageWidth - 40, pageHeight - 10);
-        pdf.text('Generated by DataFlow Analytics', 20, pageHeight - 10);
+
+      const pages = pdf.internal.getNumberOfPages();
+      for (let p = 1; p <= pages; p++) {
+        pdf.setPage(p);
+        pdf.setFontSize(9).setTextColor(120);
+        pdf.text('Generated by DataFlow Analytics Platform', margin, pageH - margin / 1.4);
+        pdf.text(`Page ${p}/${pages}`, pageW - margin, pageH - margin / 1.4, { align: 'right' });
       }
-      
-      // Save PDF
-      const fileName = `report-${reportType}-${new Date().toISOString().split('T')[0]}.pdf`;
-      pdf.save(fileName);
-      
-      addActivity('export', `Generated ${reportType} report`, 'PDF format');
-      
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert('Error generating PDF report');
+
+      pdf.save(`report-${reportType}-${new Date().toISOString().slice(0, 10)}.pdf`);
+      addActivity('export', `Generated ${reportType} report`, 'PDF');
+    } catch (e) {
+      console.error(e);
+      alert('PDF generation failed');
     } finally {
       setGenerating(false);
     }
   };
 
-  const generateExcelReport = () => {
-    if (!data || !data.fullData) {
-      alert('No data available for Excel export');
-      return;
-    }
-
-    try {
-      // Create CSV content
-      const csvContent = convertToCSV(data.fullData);
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      
-      link.setAttribute('href', url);
-      link.setAttribute('download', `data-export-${new Date().toISOString().split('T')[0]}.csv`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      addActivity('export', 'Exported data to CSV', `${data.fullData.length} records`);
-      
-    } catch (error) {
-      console.error('Error generating Excel report:', error);
-      alert('Error generating Excel report');
-    }
-  };
-
-  const convertToCSV = (data) => {
-    if (!data || data.length === 0) return '';
-    
-    const headers = Object.keys(data[0]);
-    const csvHeaders = headers.join(',');
-    
-    const csvRows = data.map(row => 
-      headers.map(header => {
-        const value = row[header];
-        // Escape commas and quotes
-        if (typeof value === 'string' && (value.includes(',') || value.includes('"'))) {
-          return `"${value.replace(/"/g, '""')}"`;
-        }
-        return value;
-      }).join(',')
-    );
-    
-    return [csvHeaders, ...csvRows].join('\n');
-  };
-
   const downloadChartImage = async () => {
-    if (!chartRef || !chartRef.current) {
-      alert('No chart available for download');
-      return;
-    }
+    if (!chartRef?.current) return alert('No chart found');
 
-    try {
-      const canvas = await html2canvas(chartRef.current);
-      const link = document.createElement('a');
-      link.download = `chart-${new Date().toISOString().split('T')[0]}.png`;
-      link.href = canvas.toDataURL();
+    const node = chartRef.current.canvas || chartRef.current.querySelector?.('canvas') || chartRef.current;
+    const base = chartRef.current.toBase64Image?.() || (await html2canvas(node, { scale: 2, useCORS: true })).toDataURL('image/png');
+
+    const img = new Image();
+    img.src = base;
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = img.width;
+      c.height = img.height + 36;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      ctx.fillStyle = 'rgba(94,53,177,0.9)';
+      ctx.font = '16px Inter,Helvetica,sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText('Generated by DataFlow Analytics Platform', c.width - 12, c.height - 12);
+
+      const link = Object.assign(document.createElement('a'), {
+        href: c.toDataURL('image/png'),
+        download: `chart-${new Date().toISOString().slice(0, 10)}.png`
+      });
       link.click();
-      
-      addActivity('export', 'Downloaded chart image', 'PNG format');
-      
-    } catch (error) {
-      console.error('Error downloading chart:', error);
-      alert('Error downloading chart image');
-    }
+      addActivity('export', 'Downloaded chart image', 'PNG + caption');
+    };
+    img.onerror = () => alert('Image export failed');
+  };
+
+  const toCSV = (rows = []) =>
+    rows.length
+      ? [
+        Object.keys(rows[0]).join(','),
+        ...rows.map((r) =>
+          Object.values(r)
+            .map((v) =>
+              typeof v === 'string' && /[",]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v
+            )
+            .join(',')
+        )
+      ].join('\n')
+      : '';
+
+  const exportCsv = () => {
+    if (!data?.fullData?.length) return alert('No data');
+    const blob = new Blob([toCSV(data.fullData)], { type: 'text/csv' });
+    const link = Object.assign(document.createElement('a'), {
+      href: URL.createObjectURL(blob),
+      download: `data-${Date.now()}.csv`
+    });
+    link.click();
+    addActivity('export', 'Exported data to CSV', `${data.fullData.length} rows`);
   };
 
   return (
     <div className="report-generator">
       <div className="report-header">
-        <h3>📊 Report Generator</h3>
-        <select 
-          value={reportType} 
-          onChange={(e) => setReportType(e.target.value)}
-          className="report-type-select"
-        >
+        <h3>📊 Report Generator</h3>
+        <select value={reportType} onChange={(e) => setReportType(e.target.value)} className="report-type-select">
           <option value="summary">Summary Report</option>
           <option value="detailed">Detailed Analysis</option>
           <option value="insights">AI Insights Report</option>
           <option value="custom">Custom Report</option>
         </select>
       </div>
-      
+
       <div className="report-actions">
-        <button 
-          className="report-btn pdf-btn" 
-          onClick={generatePDFReport}
-          disabled={generating}
-        >
-          {generating ? (
-            <>
-              <span className="btn-spinner"></span>
-              Generating...
-            </>
-          ) : (
-            <>
-              📄 Generate PDF
-            </>
-          )}
+        <button className="report-btn pdf-btn" onClick={generatePDFReport} disabled={generating}>
+          {generating ? <><span className="btn-spinner"></span>Generating…</> : <>📄 Generate PDF</>}
         </button>
-        
-        <button 
-          className="report-btn excel-btn" 
-          onClick={generateExcelReport}
-          disabled={!data}
-        >
-          📊 Export to CSV
-        </button>
-        
-        <button 
-          className="report-btn image-btn" 
-          onClick={downloadChartImage}
-          disabled={!chartRef}
-        >
-          🖼️ Download Chart
-        </button>
+        <button className="report-btn excel-btn" onClick={exportCsv} disabled={!data}>📊 Export CSV</button>
+        <button className="report-btn image-btn" onClick={downloadChartImage} disabled={!chartRef}>🖼️ Chart PNG</button>
       </div>
-      
+
       <div className="report-info">
-        <small>
-          Reports include data summary, visualizations, and AI insights. 
-          PDF reports are comprehensive while CSV exports contain raw data.
-        </small>
+        <small>PDF = summary + chart + insights  ·  CSV = raw data</small>
       </div>
     </div>
   );
