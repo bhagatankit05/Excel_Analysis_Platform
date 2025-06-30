@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import * as XLSX from 'xlsx';
-import PlotlyChart from '../../components/PlotlyChart/PlotlyChart';
-import { addActivity } from '../../components/RecentActivity/RecentActivity';
+import PlotlyChart from '../../Components/PlotlyChart/PlotlyChart';
+import { addActivity } from '../../Components/RecentActivity/RecentActivity';
 import './UploadExcel.css';
 
 const UploadExcel = () => {

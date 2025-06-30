@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import StatsCard from '../../Components/StatsCard/StatsCard';
-import RecentActivity from '../../components/RecentActivity/RecentActivity';
+import RecentActivity from '../../Components/RecentActivity/RecentActivity.jsx';
 import ReportGenerator from '../../Components/ReportGenerator/ReportGenerator';
 import PlotlyChart from '../../Components/PlotlyChart/PlotlyChart';
 import * as XLSX from 'xlsx';
@@ -20,7 +20,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import { addActivity } from '../../components/RecentActivity/RecentActivity';
+import { addActivity } from '../../Components/RecentActivity/RecentActivity';
 import './Dashboard.css';
 
 ChartJS.register(

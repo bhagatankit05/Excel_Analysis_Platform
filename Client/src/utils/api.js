@@ -1,181 +1,163 @@
-// API utility functions for backend integration
+/* ------------------------------------------------------------------ */
+/*  API utility functions for backend integration                     */
+/* ------------------------------------------------------------------ */
+
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+  import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 class ApiClient {
   constructor() {
     this.baseURL = API_BASE_URL;
   }
 
+  /* --------------------------- core ------------------------------- */
   async request(endpoint, options = {}) {
-    const url = `${this.baseURL}${endpoint}`;
+    const url   = `${this.baseURL}${endpoint}`;
     const token = this.getToken();
+
+    const {
+      headers: optHeaders = {},
+      withCredentials,
+      ...rest
+    } = options;
 
     const config = {
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         ...(token && { Authorization: `Bearer ${token}` }),
-        ...options.headers,
+        ...optHeaders
       },
-      ...options,
+      ...(withCredentials && { credentials: 'include' }),
+      ...rest
     };
 
     try {
-      const response = await fetch(url, config);
+      const res = await fetch(url, config);
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          errorData.message || `HTTP error! status: ${response.status}`
-        );
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || `HTTP error! status: ${res.status}`);
       }
 
-      return await response.json();
-    } catch (error) {
-      console.error("API request failed:", error);
-      throw error;
+      if (res.status === 204) return null; // No Content
+      return await res.json();
+    } catch (err) {
+      console.error('API request failed:', err);
+      throw err;
     }
   }
 
+  /* --------------------- token utilities ------------------------- */
   getToken() {
-    const tokenData = localStorage.getItem("token");
-    if (tokenData) {
-      try {
-        const parsed = JSON.parse(tokenData);
-        return parsed.token || parsed.access_token;
-      } catch {
-        return tokenData;
-      }
+    const raw = localStorage.getItem('token');
+    if (!raw) return null;
+
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed.token || parsed.access_token;
+    } catch {
+      return raw;
     }
-    return null;
   }
 
-  // Auth endpoints
-  async login(credentials) {
-    return this.request("/auth/login", {
-      method: "POST",
+  /* --------------------- auth endpoints -------------------------- */
+  login(credentials) {
+    return this.request('/auth/login', {
+      method: 'POST',
       body: JSON.stringify(credentials),
+      withCredentials: true
     });
   }
 
-  async register(userData) {
-    return this.request("/auth/register", {
-      method: "POST",
+  register(userData) {
+    return this.request('/auth/register', {
+      method: 'POST',
       body: JSON.stringify(userData),
+      withCredentials: true
     });
   }
 
-  async verifyToken() {
-    return this.request("/auth/verify");
-  }
+  verifyToken()    { return this.request('/auth/verify',  { withCredentials: true }); }
+  getUserProfile() { return this.request('/auth/profile', { withCredentials: true }); }
 
-  async getUserProfile() {
-    return this.request("/auth/profile");
-  }
-
-  // Data endpoints
-  async saveExcelData(data) {
-    return this.request("/data/save-excel", {
-      method: "POST",
+  /* --------------------- data endpoints -------------------------- */
+  saveExcelData(data) {
+    return this.request('/data/save-excel', {
+      method: 'POST',
       body: JSON.stringify(data),
+      withCredentials: true
     });
   }
 
-  async getExcelHistory(page = 1, limit = 10) {
-    return this.request(`/data/excel-history?page=${page}&limit=${limit}`);
-  }
-
-  async getExcelData(id) {
-    return this.request(`/data/excel/${id}`);
-  }
-
-  async getLatestExcelData() {
-    return this.request("/data/latest-excel");
-  }
-
-  async deleteExcelData(id) {
-    return this.request(`/data/excel/${id}`, {
-      method: "DELETE",
+  getExcelHistory(page = 1, limit = 10) {
+    return this.request(`/data/excel-history?page=${page}&limit=${limit}`, {
+      withCredentials: true
     });
   }
 
-  // Activity logging endpoint
-  async addActivity(activityData) {
-    return this.request("/activities", {
-      method: "POST",
+  getExcelData(id)         { return this.request(`/data/excel/${id}`,       { withCredentials: true }); }
+  getLatestExcelData()     { return this.request('/data/latest-excel',      { withCredentials: true }); }
+
+  deleteExcelData(id)      { return this.request(`/data/excel/${id}`,       { method: 'DELETE', withCredentials: true }); }
+
+  /* ------------------- activity endpoints ------------------------ */
+  addActivity(activityData) {
+    return this.request('/activities', {
+      method: 'POST',
       body: JSON.stringify(activityData),
+      withCredentials: true
     });
   }
 
-  
-
-  async getActivities(params = {}) {
-    const query = new URLSearchParams(params).toString();
-    return this.request(`/activities?${query}`);
+  getActivities(params = {}) {
+    const q = new URLSearchParams(params).toString();
+    const path = q ? `/activities?${q}` : '/activities';
+    return this.request(path, { withCredentials: true });
   }
 
-  async clearActivities(userId = null) {
-    return this.request("/activities", {
-      method: "DELETE",
+  clearActivities(userId = null) {
+    return this.request('/activities', {
+      method: 'DELETE',
       body: userId ? JSON.stringify({ userId }) : null,
+      withCredentials: true
     });
   }
 
-  // Health check
-  async checkHealth() {
-    return this.request("/health");
-  }
+  /* ------------------ health / diagnostics ----------------------- */
+  checkHealth() { return this.request('/health'); }
 
-  // Test connection
   async testConnection() {
     try {
-      const response = await this.checkHealth();
-      return {
-        connected: true,
-        status: "Connected to backend",
-        data: response,
-      };
-    } catch (error) {
-      return {
-        connected: false,
-        status: "Backend connection failed",
-        error: error.message,
-      };
+      const data = await this.checkHealth();
+      return { connected: true, status: 'Connected', data };
+    } catch (err) {
+      return { connected: false, status: 'Backend connection failed', error: err.message };
     }
   }
 }
 
 export const apiClient = new ApiClient();
 
-// Connection status checker
+/* ---------------- convenience helpers --------------------------- */
 export const checkBackendConnection = async () => {
   try {
-    const result = await apiClient.testConnection();
-    console.log("Backend connection status:", result);
-    return result;
-  } catch (error) {
-    console.error("Backend connection check failed:", error);
-    return {
-      connected: false,
-      status: "Connection check failed",
-      error: error.message,
-    };
+    const res = await apiClient.testConnection();
+    console.log('Backend connection status:', res);
+    return res;
+  } catch (err) {
+    console.error('Backend connection check failed:', err);
+    return { connected: false, status: 'Connection check failed', error: err.message };
   }
 };
 
-// Utility function to show connection status
 export const showConnectionStatus = async () => {
   const status = await checkBackendConnection();
-
   if (status.connected) {
-    console.log("✅ Backend is connected and running");
-    console.log("Database status:", status.data?.database || "Unknown");
+    console.log('✅ Backend is connected');
+    console.log('Database status:', status.data?.database || 'Unknown');
   } else {
-    console.log("❌ Backend connection failed");
-    console.log("Error:", status.error);
-    console.log("Using local storage fallback");
+    console.log('❌ Backend connection failed:', status.error);
   }
-
   return status;
 };
 

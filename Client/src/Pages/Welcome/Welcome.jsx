@@ -129,11 +129,7 @@ const Welcome = () => {
             <h4>Secure</h4>
             <p>Enterprise-grade security and data protection</p>
           </div>
-          <div className="feature-item">
-            <div className="feature-icon">📊</div>
-            <h4>Scalable</h4>
-            <p>Handle massive datasets with cloud infrastructure</p>
-          </div>
+          
         </div>
       </div>
     </div>
